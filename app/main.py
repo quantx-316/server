@@ -27,7 +27,7 @@ def get_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     users = models.User.get_users(db, skip=skip, limit=limit)
     return users 
 
-@app.get("/user/{user_id}}", response_model=schemas.User)
+@app.get("/user/{user_id}", response_model=schemas.User)
 def get_user(user_id: int, db: Session = Depends(get_db)):
     db_user = models.User.get_user(db, user_id=user_id)
     if db_user is None:
