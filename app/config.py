@@ -12,4 +12,9 @@ class Settings(BaseSettings):
         os.environ.get("POSTGRES_DB")
     )
 
+    SECRET_KEY: str = os.environ.get("SECRET_KEY", "afc1c5cafdeddb51fdfb6e38217f13901f3d785b8b00e60c332241c583ef303b")
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_TTL: int = 120 # minutes 
+
+
 settings = Settings() 
