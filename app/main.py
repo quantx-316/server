@@ -11,6 +11,8 @@ from .routers import users
 
 app.include_router(users.router)
 
+# get symbols endpoint 
+
 @app.get("/quote/{symbol}/all", response_model=List[schemas.Quote])
 def get_all_quotes_for_symbol(symbol: str, db: Session = Depends(get_db)):
     quotes = models.Quote.get_all_quotes_for_symbol(db, symbol=symbol)
