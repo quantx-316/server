@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker 
+from app.config import settings 
 
 class DB:
     """Hosts all functions for querying the database."""
@@ -33,3 +34,12 @@ class DB:
             return list(conn.execute(text(sqlstr), kwargs).fetchall())
 
 Base = declarative_base()
+
+db = DB(settings)
+
+def get_db():
+    session = db.get_session()
+    try: 
+        yield session
+    finally:
+        session.close()

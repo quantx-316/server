@@ -3,18 +3,9 @@ from datetime import datetime
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session 
 from . import models, schemas 
-from .db import DB
-from .config import settings 
+from app.db import get_db
 
 app = FastAPI()
-db = DB(settings) 
-
-def get_db():
-    session = db.get_session()
-    try: 
-        yield session
-    finally:
-        session.close()
 
 @app.post("/users/", response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
