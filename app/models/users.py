@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.db import Base 
 import schemas.users as schemas 
+from app.utils.security import password_matching, hash_password
 
 class Users(Base):
     __tablename__ = "users"
@@ -26,13 +27,26 @@ class Users(Base):
         return db.query(Users).filter(Users.email == email).first()
     
     @staticmethod 
-    def create_user(db: Session, user: schemas.UserCreate):
-        fake_hashed_password = user.password + "notreallyhashed"
-        db_user = Users(email=user.email, hashed_password=fake_hashed_password)
+    def create_user(db: Session, user: schemas.UserAuth):
+        hashed_pw = hash_password(user.password)
+        db_user = Users(email=user.email, hashed_password=hashed_pw)
         db.add(db_user)
         db.commit()
         db.refresh(db_user)
         return db_user
+    
+    @staticmethod 
+    def auth_user(db: Session, user: schemas.UserAuth):
+        """
+        Returns None if no authenticated user, otherwise
+        returns the user from database 
+        """
+        db_user = Users.get_user_by_email(db, user.email)
+        if not db_user: 
+            return 
+        if not password_matching(user.password, db_user.hashed_password):
+            return 
+        return db_user 
 
 class Profile(Base):
     __tablename__ = "profile"

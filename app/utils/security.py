@@ -20,4 +20,3 @@ def generate_access_token(user_data: dict, expiry_time = timedelta(settings.ACCE
     encode_data = user_data.copy()
     encode_data['exp'] = datetime.now() + expiry_time
     return jwt.encode(encode_data, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
-

@@ -1,10 +1,10 @@
-from pydantic import BaseModel 
+from pydantic import BaseModel, EmailStr
 
 class UsersBase(BaseModel):
-    email: str 
+    email: EmailStr
 
 # so password used when creating user, but never again accessed
-class UsersCreate(UsersBase): 
+class UserAuth(UsersBase): 
     password: str 
 
 class Users(UsersBase):
@@ -21,3 +21,6 @@ class Profile(BaseModel):
     firstname: str 
     lastname: str 
     description: str 
+
+    class Config: 
+        orm_mode = True 
