@@ -9,18 +9,12 @@ class UserAuth(UsersBase):
 
 class Users(UsersBase):
     id: int 
-
+    firstname: str = None 
+    lastname: str = None
+    description: str = None 
+    
     class Config:
         orm_mode = True 
 
 class AuthUser(Users):
     hashed_password: str 
-
-class Profile(BaseModel):
-    uid: int 
-    firstname: str 
-    lastname: str 
-    description: str 
-
-    class Config: 
-        orm_mode = True 
