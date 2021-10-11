@@ -14,7 +14,7 @@ router = APIRouter()
 
 @router.post("/token", response_model=AuthToken)
 async def get_access_token(db = Depends(get_db), form: OAuth2PasswordRequestForm = Depends()):
-    user = Users.auth_user(db, UserAuth({"username": form.username, "password": form.password}))
+    user = Users.auth_user(db, UserAuth(**{"email": form.username, "password": form.password}))
     if not user: 
         raise AuthenticationException(
             "Incorrect credentials"
@@ -22,7 +22,7 @@ async def get_access_token(db = Depends(get_db), form: OAuth2PasswordRequestForm
     access_token = generate_access_token(
         {"sub": user.email} # this is JSON specification to use 'sub' for user id
     ) 
-    return AuthToken({
+    return AuthToken(**{
         "access_token": access_token, 
         "token_type": "bearer",
     })

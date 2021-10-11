@@ -2,7 +2,7 @@ from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.orm import Session 
 
 from app.db import Base 
-import schemas.users as schemas 
+import app.schemas.users as schemas 
 from app.utils.security import password_matching, hash_password
 
 class Users(Base):
