@@ -7,7 +7,7 @@ class FileWriter:
 
     @staticmethod
     def write_csv_to_path(file_path, data: List[List[str]]):
-        with open(file_path, 'w', newline='') as f:
+        with open(file_path, 'w', newline='\n') as f:
             writer = csv.writer(f, delimiter=',')
             for row in data:
                 writer.writerow(row)

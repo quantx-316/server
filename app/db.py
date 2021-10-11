@@ -21,17 +21,11 @@ class DB:
         return sessionmaker(autocommit=False, autoflush=False, bind=self.engine)()
 
     def execute(self, sqlstr, **kwargs):
-        """Execute sqlstr and return a list of result tuples.  sqlstr will be
-        wrapped automatically in a
-        sqlalchemy.sql.expression.TextClause.  You can use :param
-        inside sqlstr and supply its value as a kwarg.  See
-        https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.execute
-        https://docs.sqlalchemy.org/en/14/core/sqlelement.html#sqlalchemy.sql.expression.text
-        https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.CursorResult
-        for additional details.  See models/*.py for examples of
-        calling this function."""
+        """Execute sqlstr and return"""
+
         with self.engine.connect() as conn:
-            return list(conn.execute(text(sqlstr), kwargs).fetchall())
+            return conn.execute(text(sqlstr))
+            # return list(conn.execute(text(sqlstr), kwargs).fetchall())
 
 Base = declarative_base()
 
