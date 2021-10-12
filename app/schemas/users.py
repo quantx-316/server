@@ -1,23 +1,24 @@
-from pydantic import BaseModel 
+from pydantic import BaseModel, EmailStr
+
 
 class UsersBase(BaseModel):
-    email: str 
+    email: EmailStr
+    firstname: str = None
+    lastname: str = None
+    description: str = None
+
 
 # so password used when creating user, but never again accessed
-class UsersCreate(UsersBase): 
-    password: str 
+class UserAuth(UsersBase):
+    password: str
+
 
 class Users(UsersBase):
-    id: int 
+    id: int
 
     class Config:
-        orm_mode = True 
+        orm_mode = True
+
 
 class AuthUser(Users):
-    hashed_password: str 
-
-class Profile(BaseModel):
-    uid: int 
-    firstname: str 
-    lastname: str 
-    description: str 
+    hashed_password: str
