@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 import app.schemas.users as schemas
 import app.models.users as models
+from app.utils.security import JWTBearer
 from app.db import get_db
 
 router = APIRouter()
@@ -18,7 +19,7 @@ def create_user(user: schemas.UserAuth, db: Session = Depends(get_db)):
     return models.Users.create_user(db=db, user=user)
 
 
-@router.get("/users/", response_model=List[schemas.Users])
+@router.get("/users/", dependencies=[Depends(JWTBearer())], response_model=List[schemas.Users])
 def get_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     users = models.Users.get_users(db, skip=skip, limit=limit)
     return users
