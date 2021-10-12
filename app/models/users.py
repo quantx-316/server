@@ -1,9 +1,11 @@
 from sqlalchemy import Column, String, Integer
 from sqlalchemy.orm import Session
+from fastapi import Depends 
 
-from app.db import Base
+from app.db import Base, get_db 
 import app.schemas.users as schemas
-from app.utils.security import password_matching, hash_password
+from app.utils.security import password_matching, hash_password, oauth2_scheme, decode_jwt
+from app.utils.exceptions import AuthenticationException
 
 
 class Users(Base):
@@ -48,4 +50,19 @@ class Users(Base):
             return
         if not password_matching(user.password, db_user.hashed_password):
             return
+        return db_user
+
+    @staticmethod 
+    async def get_auth_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+        auth_exception = AuthenticationException("Could not validate credentials")
+        try:
+            data = decode_jwt(token)
+        except:
+            raise auth_exception
+        email: str = data.get("sub")
+        if email is None:
+            raise auth_exception
+        db_user = Users.get_user_by_email(db, email=email)
+        if db_user is None:
+            raise auth_exception
         return db_user

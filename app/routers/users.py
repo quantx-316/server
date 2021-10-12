@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 import app.schemas.users as schemas
 import app.models.users as models
-from app.utils.security import JWTBearer, get_auth_user
+from app.utils.security import JWTBearer
 from app.utils.exceptions import UserNotFoundException
 from app.db import get_db
 
@@ -42,5 +42,5 @@ def get_user_by_email(user_email: str, db: Session = Depends(get_db)):
 
 
 @router.get("user/current", response_model=schemas.Users)
-def get_current_user(user = Depends(get_auth_user)):
+def get_current_user(user = Depends(models.Users.get_auth_user)):
     return user 
