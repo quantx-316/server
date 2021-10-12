@@ -5,8 +5,8 @@ from sqlalchemy.sql.expression import update
 
 from app.db import Base, get_db 
 import app.schemas.users as schemas
-from app.utils.security import password_matching, hash_password, oauth2_scheme, decode_jwt, JWTBearer
-from app.utils.exceptions import AuthenticationException, UserNotFoundException
+from app.utils.security import password_matching, hash_password, decode_jwt, JWTBearer
+from app.utils.exceptions import AuthenticationException, UserNotFoundException, UpdateException, CreateException
 from app.utils.crud import update_db_instance
 
 class Users(Base):
@@ -36,8 +36,11 @@ class Users(Base):
         hashed_pw = hash_password(user.password)
         db_user = Users(email=user.email, hashed_password=hashed_pw)
         db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
+        try: 
+            db.commit()
+            db.refresh(db_user)
+        except: 
+            raise CreateException
         return db_user
     
     @staticmethod 
@@ -46,8 +49,11 @@ class Users(Base):
         if not db_user:
             raise UserNotFoundException
         db_user = update_db_instance(db_user, old_user, new_user)
-        db.commit() 
-        db.refresh(db_user) 
+        try:
+            db.commit() 
+            db.refresh(db_user) 
+        except:
+            raise UpdateException
         return db_user 
 
     @staticmethod

@@ -20,7 +20,39 @@ class TestAuthUsers:
         IntegrationUsers.clear_users_table()
 
     # test invalid update (try to change to email already existing)
-    
+    def test_invalid_update_user(self):
+        """
+        Tests for invalid update if trying to 
+        update with a unique key 
+        """
+        self.test_create_users()
+        mock_user = self.mock_users[0]
+        creds = self.auth_user_test(mock_user['email'], mock_user['password'])
+        access_token = creds['access_token']
+        auth_header = {"Authorization":  f"Bearer {access_token}"}
+
+        copy_user = mock_user.copy()
+        del copy_user['password']
+        del copy_user['hashed_password']
+        del copy_user['id']
+        old_user = copy_user.copy() 
+        new_user = copy_user.copy() 
+        firstname, lastname = "John", "Doe"
+        new_user['email'] = self.mock_users[1]['email']
+        new_user['firstname'] = firstname
+        new_user['lastname'] = lastname 
+
+        res = client.put(
+            '/user/',
+            json={
+                'old_user': old_user,
+                'new_user': new_user,
+            },
+            headers=auth_header,
+        )
+        assert res.status_code != 200 
+        assert res.status_code == 400
+
     def test_update_user(self):
         """
         Tests for successful authentication and update 
@@ -54,6 +86,7 @@ class TestAuthUsers:
             },
             headers=auth_header,
         )
+        assert res.status_code == 200
         data = res.json() 
         assert data['id'] == user_id 
         assert data['email'] == new_user['email']
