@@ -12,8 +12,6 @@ def update_db_instance(db_instance, old_model: BaseModel, new_model: BaseModel):
         if old_val != new_val:
             diffs.append((key, new_val))
     
-    print(diffs)
-
     if not diffs:
         return db_instance 
 
