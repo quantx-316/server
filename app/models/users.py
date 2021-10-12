@@ -4,7 +4,7 @@ from fastapi import Depends
 
 from app.db import Base, get_db 
 import app.schemas.users as schemas
-from app.utils.security import password_matching, hash_password, oauth2_scheme, decode_jwt
+from app.utils.security import password_matching, hash_password, oauth2_scheme, decode_jwt, JWTBearer
 from app.utils.exceptions import AuthenticationException
 
 
@@ -53,7 +53,7 @@ class Users(Base):
         return db_user
 
     @staticmethod 
-    async def get_auth_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    def get_auth_user(db: Session = Depends(get_db), token: str = Depends(JWTBearer())):
         auth_exception = AuthenticationException("Could not validate credentials")
         try:
             data = decode_jwt(token)
@@ -62,7 +62,7 @@ class Users(Base):
         email: str = data.get("sub")
         if email is None:
             raise auth_exception
-        db_user = Users.get_user_by_email(db, email=email)
+        db_user = Users.get_user_by_email(db, email)
         if db_user is None:
             raise auth_exception
         return db_user

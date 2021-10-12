@@ -44,6 +44,6 @@ def get_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return users
 
 
-@router.get("user/current", response_model=schemas.Users)
+@router.get("/user/current/", response_model=schemas.Users)
 def get_current_user(user = Depends(models.Users.get_auth_user)):
     return user 

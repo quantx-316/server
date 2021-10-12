@@ -1,6 +1,7 @@
 from app.tests.client import client
 from app.tests.utils.users import IntegrationUsers, UserGenerator
-
+from app.models.users import Users 
+from app.db import db
 
 class TestAuth:
 
@@ -18,6 +19,37 @@ class TestAuth:
 
     def teardown_method(self):
         IntegrationUsers.clear_users_table()
+    
+    def test_get_current_user(self):
+        """
+        Tests for successful authentication and retrieval of
+        current user 
+        """
+        self.test_create_users()
+        mock_user = self.mock_users[0]
+        creds = self.auth_user_test(mock_user['email'], mock_user['password'])
+        access_token = creds['access_token']
+        auth_header = {"Authorization":  f"Bearer {access_token}"}
+        res = client.get(
+            '/user/current/',
+            headers=auth_header,
+        )
+        assert res.status_code == 200 
+        data = res.json() 
+        assert 'email' in data
+        assert 'id' in data 
+        assert data['email'] == mock_user['email']
+        assert data['id'] == mock_user['id']
+    
+    def test_fail_get_current_user(self):
+        """
+        Tests for failure to authenticate current user endpt
+        """
+        res = client.get(
+            'users/current/',
+        )
+        assert res.status_code != 200 
+        assert res.status_code != 500
 
     def test_successful_auth_users(self):
         """
