@@ -19,7 +19,7 @@ class TestAuth:
     def teardown_method(self):
         IntegrationUsers.clear_users_table()
 
-    def test_successful_auth(self):
+    def test_successful_auth_users(self):
         """
         Tests for successful accessing secured users endpoint
         """
@@ -28,8 +28,23 @@ class TestAuth:
         creds = self.auth_user_test(mock_user['email'], mock_user['password'])
         res = self.access_users_endpt(creds=creds)
         assert res.status_code == 200
+        data = res.json()
+        id_to_email = {}
+        for user in self.mock_users:
+            id_to_email[user['id']] = user['email']
+        for user in data:
+            assert 'email' in user 
+            assert 'id' in user 
+            assert 'firstname' in user 
+            assert 'lastname' in user 
+            assert 'email' in user 
+            assert 'hashed_password' not in user 
+            assert 'password' not in user 
+            user_email, user_id = user['email'], user['id']
+            assert user_id in id_to_email 
+            assert user_email == id_to_email[user_id]
 
-    def test_fail_auth(self):
+    def test_fail_auth_users(self):
         """
         Tests for failing to access secured users endpoint
         """
@@ -77,6 +92,9 @@ class TestAuth:
         return data
 
     def create_user_test(self, user_info: dict):
+        """
+        Tests POST /user/, GET /user/user_id, GET /user/user_email
+        """
         res = client.post(
             '/user/',
             json={"email": user_info['email'], "password": user_info['password']},
@@ -86,9 +104,27 @@ class TestAuth:
         assert data["email"] == user_info['email']
         assert "id" in data
 
+        token = self.auth_user_test(user_info['email'], user_info['password'])
+        access_token = token['access_token']
+
+        auth_header = {"Authorization":  f"Bearer {access_token}"}
+
         user_id = data["id"]
-        res = client.get(f"/user/{user_id}")
+        res = client.get(
+            f"/user/?user_id={user_id}",
+            headers=auth_header,
+        )
         assert res.status_code == 200
         data = res.json()
         assert data["email"] == user_info['email']
         assert data["id"] == user_id
+
+        user_email = data['email']
+        res = client.get(
+            f"/user/?user_email={user_email}",
+            headers=auth_header, 
+        )
+        assert res.status_code == 200 
+        data = res.json() 
+        assert data['email'] == user_info['email']
+        assert data['id'] == user_id 

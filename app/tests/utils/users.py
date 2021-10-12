@@ -8,7 +8,7 @@ class IntegrationUsers:
 
     @staticmethod
     def clear_users_table():
-        db.execute("TRUNCATE TABLE USERS CASCADE;")
+        db.execute("TRUNCATE TABLE USERS RESTART IDENTITY CASCADE;")
 
 
 class UserGenerator:
