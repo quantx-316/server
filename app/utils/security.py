@@ -1,11 +1,14 @@
 from datetime import datetime, timedelta
 
-from fastapi import Request
-from fastapi.security import OAuth2PasswordBearer, HTTPBearer
+from sqlalchemy.orm import Session
+from fastapi import Request, Depends
+from fastapi.security import OAuth2PasswordBearer, HTTPBearer, oauth2
 from passlib.context import CryptContext
 from jose import jwt
 
+from app.db import get_db
 from app.config import settings
+from app.models.users import Users
 from app.utils.exceptions import AuthenticationException
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -24,6 +27,21 @@ def generate_access_token(user_id: dict, expiry_time=timedelta(settings.ACCESS_T
     encode_data = user_id.copy()
     encode_data['exp'] = datetime.now() + expiry_time
     return jwt.encode(encode_data, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+
+
+async def get_auth_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    auth_exception = AuthenticationException("Could not validate credentials")
+    try:
+        data = decode_jwt(token)
+    except:
+        raise auth_exception
+    email: str = data.get("sub")
+    if email is None:
+        raise auth_exception
+    db_user = Users.get_user_by_email(db, email=email)
+    if db_user is None:
+        raise auth_exception
+    return db_user
 
 
 def decode_jwt(token):
