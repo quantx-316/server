@@ -14,7 +14,7 @@ router = APIRouter()
 
 # if you do GET id/email paths separately it WILL fail 
 # whether path or query parameter, one will overlap with the other in path parsing
-@router.get("/user/", dependencies=[Depends(JWTBearer)], response_model=schemas.Users)
+@router.get("/user/", dependencies=[Depends(JWTBearer())], response_model=schemas.Users)
 def get_user(user_id: int = None, user_email: str = None, db: Session = Depends(get_db)):
     if user_id is None and user_email is None:
         raise HTTPException(
@@ -38,8 +38,8 @@ def create_user(user: schemas.UserAuth, db: Session = Depends(get_db)):
     return models.Users.create_user(db=db, user=user)
 
 
-@router.put("/user/", dependencies=[Depends(JWTBearer)], response_model=schemas.Users)
-def update_user(old_user: schemas.Users, new_user: schemas.Users, db: Session = Depends(get_db)):
+@router.put("/user/", dependencies=[Depends(JWTBearer())], response_model=schemas.Users)
+def update_user(old_user: schemas.UsersBase, new_user: schemas.UsersBase, db: Session = Depends(get_db)):
     return models.Users.update_user(db, old_user, new_user) 
 
 

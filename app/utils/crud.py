@@ -5,15 +5,20 @@ from pydantic import BaseModel
 def update_db_instance(db_instance, old_model: BaseModel, new_model: BaseModel):
 
     diffs = []
-    for var, val in vars(old_model).items():
-        if getattr(new_model, var) != val:
-            diffs.append((var, getattr(new_model, var)))
+
+    for key in db_instance.__table__.columns.keys():
+        old_val = getattr(old_model, key, None)
+        new_val = getattr(new_model, key, None)
+        if old_val != new_val:
+            diffs.append((key, new_val))
     
+    print(diffs)
+
     if not diffs:
         return db_instance 
-    
-    for var, val in diffs:
-        setattr(db_instance, var, val)
+
+    for key, val in diffs:
+        setattr(db_instance, key, val)
     
     return db_instance 
 
