@@ -1,12 +1,13 @@
 from sqlalchemy import Column, String, Integer
 from sqlalchemy.orm import Session
-from fastapi import Depends 
+from fastapi import Depends
+from sqlalchemy.sql.expression import update 
 
 from app.db import Base, get_db 
 import app.schemas.users as schemas
 from app.utils.security import password_matching, hash_password, oauth2_scheme, decode_jwt, JWTBearer
 from app.utils.exceptions import AuthenticationException
-
+from app.utils.crud import update_db_instance
 
 class Users(Base):
     __tablename__ = "users"
@@ -38,6 +39,14 @@ class Users(Base):
         db.commit()
         db.refresh(db_user)
         return db_user
+    
+    @staticmethod 
+    def update_user(db: Session, old_user: schemas.Users, new_user: schemas.Users):
+        db_user = Users.get_user_by_email(db, old_user.email)
+        db_user = update_db_instance(db_user, old_user, new_user)
+        db.commit() 
+        db.refresh(db_user) 
+        return db_user 
 
     @staticmethod
     def auth_user(db: Session, user: schemas.UserAuth):

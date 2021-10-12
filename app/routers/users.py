@@ -38,12 +38,17 @@ def create_user(user: schemas.UserAuth, db: Session = Depends(get_db)):
     return models.Users.create_user(db=db, user=user)
 
 
+@router.put("/user/", dependencies=[Depends(JWTBearer)], response_model=schemas.Users)
+def update_user(old_user: schemas.Users, new_user: schemas.Users, db: Session = Depends(get_db)):
+    return models.Users.update_user(db, old_user, new_user) 
+
+
 @router.get("/users/", dependencies=[Depends(JWTBearer())], response_model=List[schemas.Users])
 def get_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     users = models.Users.get_users(db, skip=skip, limit=limit)
     return users
 
 
-@router.get("/user/current/", response_model=schemas.Users)
+@router.get("/user/current/", dependencies=[Depends(JWTBearer())], response_model=schemas.Users)
 def get_current_user(user = Depends(models.Users.get_auth_user)):
     return user 
