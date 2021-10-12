@@ -203,10 +203,11 @@ class TestAuthUsers:
         """
         res = client.post(
             '/user/',
-            json={"email": user_info['email'], "password": user_info['password']},
+            json={"email": user_info['email'], "password": user_info['password'], "firstname": "Bob"},
         )
         assert res.status_code == 200
         data = res.json()
+        assert data["firstname"] == "Bob"
         assert data["email"] == user_info['email']
         assert "id" in data
 

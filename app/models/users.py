@@ -34,7 +34,9 @@ class Users(Base):
     @staticmethod
     def create_user(db: Session, user: schemas.UserAuth):
         hashed_pw = hash_password(user.password)
-        db_user = Users(email=user.email, hashed_password=hashed_pw)
+        user_attrs = vars(user)
+        del user_attrs['password']
+        db_user = Users(**user_attrs, hashed_password=hashed_pw)
         db.add(db_user)
         try: 
             db.commit()
