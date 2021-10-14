@@ -8,7 +8,7 @@ class IntegrationUsers:
 
     @staticmethod
     def clear_users_table():
-        db.execute("TRUNCATE TABLE USERS CASCADE;")
+        db.execute("TRUNCATE TABLE USERS RESTART IDENTITY CASCADE;")
 
 
 class UserGenerator:
@@ -25,7 +25,7 @@ class UserGenerator:
     def generate_fake_users_csv(self, num_users):
         FileWriter.write_csv_to_path(
             app.tests.constants.DEFAULT_FAKE_USER_CSV_OUTPUT,
-            [[str(val) for key, val in user.items() if key != "password"] + ['', '', ''] for user in self.generate_users(num_users)]
+            [[str(val) for key, val in user.items() if key != "password"] for user in self.generate_users(num_users)]
         )
 
     def generate_fake_users_json(self, num_users):
@@ -48,6 +48,9 @@ class UserGenerator:
             "email": self.get_fake_email(),
             "hashed_password": self.get_fake_hashed_pw(),
             "password": self.get_fake_pw(),
+            "firstname": None, 
+            "lastname": None, 
+            "description": None, 
         }
         return user
 
