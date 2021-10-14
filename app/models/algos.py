@@ -5,7 +5,7 @@ from app.db import Base
 import app.schemas.algos as algos_schema 
 import app.schemas.users as users_schema 
 from app.models.users import Users
-from app.utils.time import get_current_time
+from app.utils.crud import add_obj_to_db
 
 
 class Algorithm(Base):
@@ -39,29 +39,5 @@ class Algorithm(Base):
             'title': algo.title, 
             'code': algo.code, 
         })
-        db.add(db_algo)
-        db.commit()
-        db.refresh(db_algo)
+        add_obj_to_db(db, db_algo)
         return db_algo 
-
-    # @staticmethod
-    # def create_user(db: Session, user: schemas.UserAuth):
-    #     hashed_pw = hash_password(user.password)
-    #     db_user = Users(email=user.email, hashed_password=hashed_pw)
-    #     db.add(db_user)
-    #     db.commit()
-    #     db.refresh(db_user)
-    #     return db_user
-
-    # @staticmethod
-    # def auth_user(db: Session, user: schemas.UserAuth):
-    #     """
-    #     Returns None if no authenticated user, otherwise
-    #     returns the user from database 
-    #     """
-    #     db_user = Users.get_user_by_email(db, user.email)
-    #     if not db_user:
-    #         return
-    #     if not password_matching(user.password, db_user.hashed_password):
-    #         return
-    #     return db_user
