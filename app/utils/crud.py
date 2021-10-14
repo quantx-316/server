@@ -1,5 +1,13 @@
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from app.db import Base 
+from app.utils.exceptions import CreateException, UpdateException
+
+
+def add_obj_to_db(db: Session, obj: Base):
+    db.add(obj)
+    db.commit()
+    db.refresh(obj)
 
 
 def update_db_instance(db_instance, old_model: BaseModel, new_model: BaseModel):

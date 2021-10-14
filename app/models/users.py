@@ -6,7 +6,7 @@ from app.db import Base, get_db
 import app.schemas.users as schemas
 from app.utils.security import password_matching, hash_password, decode_jwt, JWTBearer
 from app.utils.exceptions import AuthenticationException, UserNotFoundException, UpdateException, CreateException
-from app.utils.crud import update_db_instance
+from app.utils.crud import update_db_instance, add_obj_to_db
 
 class Users(Base):
     __tablename__ = "users"
@@ -41,9 +41,7 @@ class Users(Base):
         del user_attrs['password']
         db_user = Users(**user_attrs, hashed_password=hashed_pw)
         try: 
-            db.add(db_user)
-            db.commit()
-            db.refresh(db_user)
+            add_obj_to_db(db, db_user)
         except: 
             raise CreateException
         return db_user
