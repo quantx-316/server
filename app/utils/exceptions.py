@@ -31,7 +31,7 @@ async def resource_not_found_exception_handler(request: Request, exception: Reso
 
 
 UserNotFoundException = ResourceNotFoundException("User not found")
-
+AlgoNotFoundException =  ResourceNotFoundException("Algo not found")
 
 class BadRequestException(Exception):
     def __init__(self, msg: str):
@@ -48,3 +48,19 @@ async def bad_request_exception_handler(request: Request, exception: BadRequestE
 
 UpdateException = BadRequestException("Update failed")
 CreateException = BadRequestException("Create failed")
+
+
+class AccessDeniedException(Exception):
+    def __init__(self, msg: str):
+        self.msg = msg 
+
+
+@app.exception_handler(AccessDeniedException)
+async def access_denied_exception_handler(request: Request, exception: AccessDeniedException):
+    return JSONResponse(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        CONTENT={"message": exception.msg}
+    )
+
+
+NotOwnerException = AccessDeniedException("User is not the owner of requested resource")

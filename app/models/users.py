@@ -51,12 +51,9 @@ class Users(Base):
         db_user = Users.get_user_by_email(db, old_user.email)
         if not db_user:
             raise UserNotFoundException
-        try:
-            db_user = update_db_instance(db_user, old_user, new_user)
-            db.commit() 
-            db.refresh(db_user) 
-        except:
-            raise UpdateException
+        db_user = update_db_instance(db_user, old_user, new_user)
+        db.commit() 
+        db.refresh(db_user) 
         return db_user 
 
     @staticmethod

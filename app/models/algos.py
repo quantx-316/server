@@ -1,3 +1,4 @@
+from pydantic.errors import NotNoneError
 from sqlalchemy import Column, String, Integer, ForeignKey, DateTime
 from sqlalchemy.orm import Session
 
@@ -5,7 +6,8 @@ from app.db import Base
 import app.schemas.algos as algos_schema 
 import app.schemas.users as users_schema 
 from app.models.users import Users
-from app.utils.crud import add_obj_to_db
+from app.utils.crud import add_obj_to_db, update_db_instance
+from app.utils.exceptions import NotOwnerException, AlgoNotFoundException
 
 
 class Algorithm(Base):
@@ -40,4 +42,18 @@ class Algorithm(Base):
             'code': algo.code, 
         })
         add_obj_to_db(db, db_algo)
+        return db_algo 
+
+    @staticmethod 
+    def update_algo(db: Session, old_algo: algos_schema.AlgoDB, new_algo: algos_schema.AlgoDB, owner: users_schema.Users):
+
+        if  old_algo.id != owner.id:
+            raise NotOwnerException
+        
+        db_algo = Algorithm.get_algo_by_id(old_algo.id)
+        if not db_algo: 
+            raise AlgoNotFoundException
+        db_algo = update_db_instance(db_algo, old_algo, new_algo)
+        db.commit()
+        db.refresh(db_algo)
         return db_algo 
