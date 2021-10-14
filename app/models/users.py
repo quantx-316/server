@@ -1,7 +1,6 @@
 from sqlalchemy import Column, String, Integer
 from sqlalchemy.orm import Session
 from fastapi import Depends
-from sqlalchemy.sql.expression import update 
 
 from app.db import Base, get_db 
 import app.schemas.users as schemas
@@ -26,6 +25,10 @@ class Users(Base):
     @staticmethod
     def get_users(db: Session, skip: int = 0, limit: int = 100):
         return db.query(Users).offset(skip).limit(limit).all()
+    
+    @staticmethod 
+    def get_user_id_from_email(db: Session, email: str):
+        return db.query(Users).filter(Users.email == email).first().id 
 
     @staticmethod
     def get_user_by_email(db: Session, email: str):
@@ -37,8 +40,8 @@ class Users(Base):
         user_attrs = vars(user)
         del user_attrs['password']
         db_user = Users(**user_attrs, hashed_password=hashed_pw)
-        db.add(db_user)
         try: 
+            db.add(db_user)
             db.commit()
             db.refresh(db_user)
         except: 
@@ -50,8 +53,8 @@ class Users(Base):
         db_user = Users.get_user_by_email(db, old_user.email)
         if not db_user:
             raise UserNotFoundException
-        db_user = update_db_instance(db_user, old_user, new_user)
         try:
+            db_user = update_db_instance(db_user, old_user, new_user)
             db.commit() 
             db.refresh(db_user) 
         except:
