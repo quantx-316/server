@@ -161,12 +161,12 @@ class TestAuthUsers:
     def access_users_endpt(self, creds=None):
         if creds:
             res = client.get(
-                '/users/',
+                '/user/all/',
                 headers={'Authorization': f'Bearer {creds["access_token"]}'}
             )
         else:
             res = client.get(
-                '/users/'
+                '/user/all/'
             )
         return res
 
