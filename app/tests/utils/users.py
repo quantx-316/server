@@ -18,7 +18,7 @@ def create_user(user_info: dict):
     assert data["email"] == user_info['email']
     assert "id" in data
     return data 
-    
+
 
 def create_users(user_infos: List[dict]): 
     for user_info in user_infos:
@@ -37,11 +37,14 @@ def auth_user_test(username, password):
     return data
 
 
-class IntegrationUsers:
+def get_auth_user_token(username, password):
+    creds = auth_user_test(username, password)
+    return creds['access_token']
 
-    @staticmethod
-    def clear_users_table():
-        db.execute("TRUNCATE TABLE USERS RESTART IDENTITY CASCADE;")
+
+def get_auth_user_header(username, password):
+    access_token = get_auth_user_token(username, password)
+    return {"Authorization": f"Bearer {access_token}"}
 
 
 class UserGenerator:

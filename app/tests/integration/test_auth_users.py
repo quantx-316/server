@@ -1,6 +1,6 @@
 from app.tests.client import client
-from app.tests.utils.users import IntegrationUsers, UserGenerator, auth_user_test, create_user
-
+from app.tests.utils.users import UserGenerator, auth_user_test, create_user
+from app.tests.utils.shared import IntegrationClear
 
 class TestAuthUsers:
 
@@ -14,10 +14,10 @@ class TestAuthUsers:
         pass
 
     def setup_method(self):
-        IntegrationUsers.clear_users_table()
+        IntegrationClear.clear_users_table()
 
     def teardown_method(self):
-        IntegrationUsers.clear_users_table()
+        IntegrationClear.clear_users_table()
 
     # test invalid update (try to change to email already existing)
     def test_invalid_update_user(self):
