@@ -2,7 +2,7 @@ from pydantic.errors import NotNoneError
 from sqlalchemy import Column, String, Integer, ForeignKey, DateTime
 from sqlalchemy.orm import Session
 
-from app.db import Base
+from app.db import Base, db
 import app.schemas.algos as algos_schema 
 import app.schemas.users as users_schema 
 from app.models.users import Users
@@ -47,7 +47,7 @@ class Algorithm(Base):
     @staticmethod 
     def update_algo(db: Session, old_algo: algos_schema.AlgoDB, new_algo: algos_schema.AlgoDB, owner: users_schema.Users):
 
-        if  old_algo.id != owner.id:
+        if  old_algo.owner != owner.id:
             raise NotOwnerException
         
         db_algo = Algorithm.get_algo_by_id(old_algo.id)
@@ -57,3 +57,14 @@ class Algorithm(Base):
         db.commit()
         db.refresh(db_algo)
         return db_algo 
+    
+    @staticmethod 
+    def delete_algo(db: Session, algo: algos_schema.AlgoDB, owner: users_schema.Users):
+
+        if algo.owner != owner.id: 
+            raise NotOwnerException
+        
+        db_algo = Algorithm.get_algo_by_id(algo.id)
+        db_algo.delete()
+        db.commit()
+        
