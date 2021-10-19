@@ -3,10 +3,11 @@ from app.db import get_db
 
 app = FastAPI()
 
-from .routers import users, security
+from .routers import users, security, algos
 
 app.include_router(users.router)
 app.include_router(security.router)
+app.include_router(algos.router)
 
 # # get symbols endpoint 
 

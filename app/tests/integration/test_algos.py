@@ -19,6 +19,7 @@ class TestAlgos:
         IntegrationClear.clear_algos_table()
 
     def teardown_method(self):
+        IntegrationClear.clear_users_table()
         IntegrationClear.clear_algos_table()
     
     def test_create_algo(self):
@@ -41,7 +42,9 @@ class TestAlgos:
             headers=auth_header,
         )
 
-        print(res.status_code)
+        assert res.status_code == 200
+
+        # test getting algo\s for user to see 
 
 
 # class AlgoBase(BaseModel):

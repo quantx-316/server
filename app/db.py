@@ -24,8 +24,11 @@ class DB:
         """Execute sqlstr and return"""
 
         with self.engine.connect() as conn:
-            return conn.execute(text(sqlstr))
+            return conn.execute(self.validate_sqlstr(sqlstr))
             # return list(conn.execute(text(sqlstr), kwargs).fetchall())
+
+    def validate_sqlstr(self, sqlstr):
+        return text(sqlstr)
 
 Base = declarative_base()
 

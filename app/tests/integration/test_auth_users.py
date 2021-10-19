@@ -27,7 +27,7 @@ class TestAuthUsers:
         """
         self.test_create_users()
         mock_user = self.mock_users[0]
-        creds = self.auth_user_test(mock_user['email'], mock_user['password'])
+        creds = auth_user_test(mock_user['email'], mock_user['password'])
         access_token = creds['access_token']
         auth_header = {"Authorization":  f"Bearer {access_token}"}
 
@@ -41,17 +41,18 @@ class TestAuthUsers:
         new_user['email'] = self.mock_users[1]['email']
         new_user['firstname'] = firstname
         new_user['lastname'] = lastname 
-
-        res = client.put(
-            '/user/',
-            json={
-                'old_user': old_user,
-                'new_user': new_user,
-            },
-            headers=auth_header,
-        )
-        assert res.status_code != 200 
-        assert res.status_code == 400
+        try:
+            res = client.put(
+                '/user/',
+                json={
+                    'old_user': old_user,
+                    'new_user': new_user,
+                },
+                headers=auth_header,
+            )
+            assert False == True # reach this point, shouldve thrown exception above 
+        except Exception as e: 
+            print(e)
 
     def test_update_user(self):
         """
