@@ -21,17 +21,22 @@ class Algorithm(Base):
     edited_at = Column(DateTime, nullable=False)
 
     @staticmethod
-    def get_algo_by_id(db: Session, algo_id: int):
-        return db.query(Algorithm).filter(Algorithm.id == algo_id).first()
+    def get_algo_by_id(db: Session, algo_id: int, owner: users_schema.Users):
+        algo = db.query(Algorithm).filter(Algorithm.id == algo_id).first()
+
+        if algo.owner != owner.id: 
+            raise NotOwnerException
+        
+        return algo 
     
     @staticmethod 
-    def get_algo_by_user_email(db: Session, user_email: str):
-        user_id = Users.get_user_id_from_email(user_email)
-        return Algorithm.get_algo_by_user_id(user_id)
+    def get_algo_by_user_email(db: Session, user_email: str, owner: users_schema.Users):
+        user = Users.get_user_by_email(user_email)
+        return Algorithm.get_algo_by_user(db, user)
 
     @staticmethod 
-    def get_algo_by_user_id(db: Session, user_id: int):
-        return db.query(Algorithm).filter(Algorithm.owner == user_id).first() 
+    def get_algo_by_user(db: Session, owner: users_schema.Users):
+        return db.query(Algorithm).filter(Algorithm.owner == owner.id).all()
 
     @staticmethod 
     def create_algo(db: Session, algo: algos_schema.AlgoSubmit, owner: users_schema.Users):

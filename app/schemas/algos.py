@@ -13,7 +13,7 @@ class AlgoDB(AlgoBase):
     id: int 
     owner: int 
     created: datetime 
-    editedd_at: datetime 
+    edited_at: datetime 
 
     class Config: 
         orm_mode = True 
