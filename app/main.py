@@ -1,16 +1,13 @@
-from typing import List 
-from datetime import datetime 
-from fastapi import Depends, FastAPI, HTTPException
-from sqlalchemy.orm import Session 
-from . import models, schemas 
+from fastapi import Depends, FastAPI
 from app.db import get_db
 
 app = FastAPI()
 
-from .routers import users, security
+from .routers import users, security, algos
 
 app.include_router(users.router)
 app.include_router(security.router)
+app.include_router(algos.router)
 
 # # get symbols endpoint 
 

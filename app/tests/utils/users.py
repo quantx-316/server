@@ -1,14 +1,50 @@
+from typing import List 
+
 import app.tests.constants
+from app.tests.client import client
 from app.tests.utils.files import FileWriter
 from app.utils.security import hash_password
 from app.db import db
 
 
-class IntegrationUsers:
+def create_user(user_info: dict):
+    res = client.post(
+        '/user/',
+        json={"email": user_info['email'], "password": user_info['password'], "firstname": "Bob"},
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["firstname"] == "Bob"
+    assert data["email"] == user_info['email']
+    assert "id" in data
+    return data 
 
-    @staticmethod
-    def clear_users_table():
-        db.execute("TRUNCATE TABLE USERS RESTART IDENTITY CASCADE;")
+
+def create_users(user_infos: List[dict]): 
+    for user_info in user_infos:
+        create_user(user_info)
+
+
+def auth_user_test(username, password):
+    res = client.post(
+        '/token',
+        data={"username": username, "password": password}
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert "access_token" in data
+    assert data["token_type"] == "bearer"
+    return data
+
+
+def get_auth_user_token(username, password):
+    creds = auth_user_test(username, password)
+    return creds['access_token']
+
+
+def get_auth_user_header(username, password):
+    access_token = get_auth_user_token(username, password)
+    return {"Authorization": f"Bearer {access_token}"}
 
 
 class UserGenerator:

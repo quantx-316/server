@@ -1,6 +1,6 @@
 from app.tests.client import client
-from app.tests.utils.users import IntegrationUsers, UserGenerator
-
+from app.tests.utils.users import UserGenerator, auth_user_test, create_user
+from app.tests.utils.shared import IntegrationClear
 
 class TestAuthUsers:
 
@@ -14,10 +14,10 @@ class TestAuthUsers:
         pass
 
     def setup_method(self):
-        IntegrationUsers.clear_users_table()
+        IntegrationClear.clear_users_table()
 
     def teardown_method(self):
-        IntegrationUsers.clear_users_table()
+        IntegrationClear.clear_users_table()
 
     # test invalid update (try to change to email already existing)
     def test_invalid_update_user(self):
@@ -27,7 +27,7 @@ class TestAuthUsers:
         """
         self.test_create_users()
         mock_user = self.mock_users[0]
-        creds = self.auth_user_test(mock_user['email'], mock_user['password'])
+        creds = auth_user_test(mock_user['email'], mock_user['password'])
         access_token = creds['access_token']
         auth_header = {"Authorization":  f"Bearer {access_token}"}
 
@@ -41,17 +41,18 @@ class TestAuthUsers:
         new_user['email'] = self.mock_users[1]['email']
         new_user['firstname'] = firstname
         new_user['lastname'] = lastname 
-
-        res = client.put(
-            '/user/',
-            json={
-                'old_user': old_user,
-                'new_user': new_user,
-            },
-            headers=auth_header,
-        )
-        assert res.status_code != 200 
-        assert res.status_code == 400
+        try:
+            res = client.put(
+                '/user/',
+                json={
+                    'old_user': old_user,
+                    'new_user': new_user,
+                },
+                headers=auth_header,
+            )
+            assert False == True # reach this point, shouldve thrown exception above 
+        except Exception as e: 
+            print(e)
 
     def test_update_user(self):
         """
@@ -60,7 +61,7 @@ class TestAuthUsers:
         """
         self.test_create_users()
         mock_user = self.mock_users[0]
-        creds = self.auth_user_test(mock_user['email'], mock_user['password'])
+        creds = auth_user_test(mock_user['email'], mock_user['password'])
         access_token = creds['access_token']
         auth_header = {"Authorization":  f"Bearer {access_token}"}
         
@@ -101,7 +102,7 @@ class TestAuthUsers:
         """
         self.test_create_users()
         mock_user = self.mock_users[0]
-        creds = self.auth_user_test(mock_user['email'], mock_user['password'])
+        creds = auth_user_test(mock_user['email'], mock_user['password'])
         access_token = creds['access_token']
         auth_header = {"Authorization":  f"Bearer {access_token}"}
         res = client.get(
@@ -131,7 +132,7 @@ class TestAuthUsers:
         """
         self.test_create_users()
         mock_user = self.mock_users[0]
-        creds = self.auth_user_test(mock_user['email'], mock_user['password'])
+        creds = auth_user_test(mock_user['email'], mock_user['password'])
         res = self.access_users_endpt(creds=creds)
         assert res.status_code == 200
         data = res.json()
@@ -161,12 +162,12 @@ class TestAuthUsers:
     def access_users_endpt(self, creds=None):
         if creds:
             res = client.get(
-                '/users/',
+                '/user/all/',
                 headers={'Authorization': f'Bearer {creds["access_token"]}'}
             )
         else:
             res = client.get(
-                '/users/'
+                '/user/all/'
             )
         return res
 
@@ -177,7 +178,7 @@ class TestAuthUsers:
         """
         self.test_create_users()
         for mock_user in self.mock_users:
-            self.auth_user_test(mock_user['email'], mock_user['password'])
+            auth_user_test(mock_user['email'], mock_user['password'])
 
     def test_create_users(self):
         """
@@ -185,33 +186,14 @@ class TestAuthUsers:
         """
         for mock_user in self.mock_users:
             self.create_user_test(mock_user)
-
-    def auth_user_test(self, username, password):
-        res = client.post(
-            '/token',
-            data={"username": username, "password": password}
-        )
-        assert res.status_code == 200
-        data = res.json()
-        assert "access_token" in data
-        assert data["token_type"] == "bearer"
-        return data
-
+            
     def create_user_test(self, user_info: dict):
         """
         Tests POST /user/, GET /user/user_id, GET /user/user_email
         """
-        res = client.post(
-            '/user/',
-            json={"email": user_info['email'], "password": user_info['password'], "firstname": "Bob"},
-        )
-        assert res.status_code == 200
-        data = res.json()
-        assert data["firstname"] == "Bob"
-        assert data["email"] == user_info['email']
-        assert "id" in data
+        data = create_user(user_info)
 
-        token = self.auth_user_test(user_info['email'], user_info['password'])
+        token = auth_user_test(user_info['email'], user_info['password'])
         access_token = token['access_token']
 
         auth_header = {"Authorization":  f"Bearer {access_token}"}
