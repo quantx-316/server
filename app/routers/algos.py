@@ -37,16 +37,16 @@ def update_algo(
 
 @router.delete("/")
 def delete_algo(
-    algo: algos_schemas.AlgoSubmit, 
+    algo_id: int, 
     user = Depends(users_models.Users.get_auth_user), 
     db: Session = Depends(get_db)
 ):
-    return algos_models.Algorithm.delete_algo(db, algo, user)
+    return algos_models.Algorithm.delete_algo(db, algo_id, user)
 
 
 @router.get("/all/", response_model=List[algos_schemas.AlgoDB])
 def get_algos(user=Depends(users_models.Users.get_auth_user), db: Session = Depends(get_db)):
-    return algos_models.Algorithm.get_algo_by_user_id(db, user)
+    return algos_models.Algorithm.get_algo_by_user(db, user)
 
 
 @router.get("/", response_model=algos_schemas.AlgoDB)

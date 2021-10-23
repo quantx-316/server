@@ -59,7 +59,7 @@ class AccessDeniedException(Exception):
 async def access_denied_exception_handler(request: Request, exception: AccessDeniedException):
     return JSONResponse(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        CONTENT={"message": exception.msg}
+        content={"message": exception.msg}
     )
 
 

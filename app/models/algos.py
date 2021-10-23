@@ -7,7 +7,7 @@ import app.schemas.algos as algos_schema
 import app.schemas.users as users_schema 
 from app.models.users import Users
 from app.utils.crud import add_obj_to_db, update_db_instance
-from app.utils.exceptions import NotOwnerException, AlgoNotFoundException
+from app.utils.exceptions import NotOwnerException, AlgoNotFoundException, UpdateException
 
 
 class Algorithm(Base):
@@ -23,6 +23,9 @@ class Algorithm(Base):
     @staticmethod
     def get_algo_by_id(db: Session, algo_id: int, owner: users_schema.Users):
         algo = db.query(Algorithm).filter(Algorithm.id == algo_id).first()
+
+        if not algo: 
+            raise AlgoNotFoundException
 
         if algo.owner != owner.id: 
             raise NotOwnerException
@@ -52,6 +55,7 @@ class Algorithm(Base):
         VALUES ({owner.id}, '{algo.title}', '{algo.code}')
         RETURNING id
         """))
+        db.commit() 
         algo_id = res.first()[0]
         return Algorithm.get_algo_by_id(db, algo_id, owner)
 
@@ -61,21 +65,26 @@ class Algorithm(Base):
         if  old_algo.owner != owner.id:
             raise NotOwnerException
         
-        db_algo = Algorithm.get_algo_by_id(old_algo.id)
+        db_algo = Algorithm.get_algo_by_id(db, old_algo.id, owner)
         if not db_algo: 
             raise AlgoNotFoundException
-        db_algo = update_db_instance(db_algo, old_algo, new_algo)
-        db.commit()
+        
+        try: 
+            db_algo = update_db_instance(db_algo, old_algo, new_algo)
+            db.commit()
+        except:
+            raise UpdateException
+
         db.refresh(db_algo)
         return db_algo 
     
     @staticmethod 
-    def delete_algo(db: Session, algo: algos_schema.AlgoDB, owner: users_schema.Users):
+    def delete_algo(db: Session, algo_id: int, owner: users_schema.Users):
 
-        if algo.owner != owner.id: 
+        if algo_id != owner.id: 
             raise NotOwnerException
         
-        db_algo = Algorithm.get_algo_by_id(algo.id)
-        db_algo.delete()
+        db_algo = Algorithm.get_algo_by_id(db, algo_id, owner)
+        db.delete(db_algo)
         db.commit()
         
