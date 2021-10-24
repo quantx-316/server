@@ -10,11 +10,14 @@ from app.db import db
 def create_user(user_info: dict):
     res = client.post(
         '/user/',
-        json={"email": user_info['email'], "password": user_info['password'], "firstname": "Bob"},
+        json={
+            "email": user_info['email'], 
+            "username": user_info['username'],
+            "password": user_info['password'], 
+        },
     )
     assert res.status_code == 200
     data = res.json()
-    assert data["firstname"] == "Bob"
     assert data["email"] == user_info['email']
     assert "id" in data
     return data 
@@ -81,6 +84,7 @@ class UserGenerator:
     def generate_user(self):
         user = {
             'id': self.get_user_id(),
+            "username": self.get_username(),
             "email": self.get_fake_email(),
             "hashed_password": self.get_fake_hashed_pw(),
             "password": self.get_fake_pw(),
@@ -89,6 +93,9 @@ class UserGenerator:
             "description": None, 
         }
         return user
+    
+    def get_username(self):
+        return f"user{self.get_user_id()}"
 
     def get_fake_email(self):
         return f"user{self.get_user_id()}{self.get_email_ending()}"

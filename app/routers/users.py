@@ -33,7 +33,7 @@ def get_user(user_id: int = None, user_email: str = None, db: Session = Depends(
 
 
 @router.post("/", response_model=schemas.Users)
-def create_user(user: schemas.UserAuth, db: Session = Depends(get_db)):
+def create_user(user: schemas.UserRegister, db: Session = Depends(get_db)):
     db_user = models.Users.get_user_by_email(db, email=user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -41,7 +41,7 @@ def create_user(user: schemas.UserAuth, db: Session = Depends(get_db)):
 
 
 @router.put("/", dependencies=[Depends(JWTBearer())], response_model=schemas.Users)
-def update_user(old_user: schemas.UsersBase, new_user: schemas.UsersBase, db: Session = Depends(get_db)):
+def update_user(old_user: schemas.Users, new_user: schemas.Users, db: Session = Depends(get_db)):
     return models.Users.update_user(db, old_user, new_user) 
 
 

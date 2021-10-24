@@ -13,6 +13,7 @@ class Users(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
+    username = Column(String, unique=True, index=True, nullable=False)
     firstname = Column(String)
     lastname = Column(String)
     description = Column(String)
@@ -35,7 +36,7 @@ class Users(Base):
         return db.query(Users).filter(Users.email == email).first()
 
     @staticmethod
-    def create_user(db: Session, user: schemas.UserAuth):
+    def create_user(db: Session, user: schemas.UserRegister):
         hashed_pw = hash_password(user.password)
         user_attrs = vars(user)
         del user_attrs['password']
@@ -60,7 +61,7 @@ class Users(Base):
         return db_user 
 
     @staticmethod
-    def auth_user(db: Session, user: schemas.UserAuth):
+    def auth_user(db: Session, user: schemas.UserLogin):
         """
         Returns None if no authenticated user, otherwise
         returns the user from database 

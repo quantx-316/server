@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from app.models.users import Users
 from app.schemas.security import AuthToken
-from app.schemas.users import UserAuth
+from app.schemas.users import UserLogin
 from app.utils.security import generate_access_token
 from app.utils.exceptions import AuthenticationException
 from app.db import get_db
@@ -13,7 +13,7 @@ router = APIRouter()
 
 @router.post("/token", response_model=AuthToken)
 async def get_access_token(db=Depends(get_db), form: OAuth2PasswordRequestForm = Depends()):
-    user = Users.auth_user(db, UserAuth(**{"email": form.username, "password": form.password}))
+    user = Users.auth_user(db, UserLogin(**{"email": form.username, "password": form.password}))
     if not user:
         raise AuthenticationException(
             "Incorrect credentials"

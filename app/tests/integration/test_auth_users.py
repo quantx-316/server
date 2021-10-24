@@ -70,7 +70,6 @@ class TestAuthUsers:
         del copy_user['password']
         del copy_user['hashed_password']
         user_id = copy_user['id']
-        del copy_user['id']
         old_user = copy_user.copy() 
         new_user = copy_user.copy() 
         firstname, lastname = "John", "Doe"
