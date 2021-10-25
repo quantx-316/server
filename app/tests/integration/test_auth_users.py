@@ -35,7 +35,6 @@ class TestAuthUsers:
         del copy_user['password']
         del copy_user['hashed_password']
         del copy_user['id']
-        old_user = copy_user.copy() 
         new_user = copy_user.copy() 
         firstname, lastname = "John", "Doe"
         new_user['email'] = self.mock_users[1]['email']
@@ -44,10 +43,7 @@ class TestAuthUsers:
         try:
             res = client.put(
                 '/user/',
-                json={
-                    'old_user': old_user,
-                    'new_user': new_user,
-                },
+                json=new_user,
                 headers=auth_header,
             )
             assert False == True # reach this point, shouldve thrown exception above 
@@ -70,24 +66,19 @@ class TestAuthUsers:
         del copy_user['password']
         del copy_user['hashed_password']
         user_id = copy_user['id']
-        old_user = copy_user.copy() 
         new_user = copy_user.copy() 
         firstname, lastname = "John", "Doe"
-        new_user['email'] = 'randemail@gmail.com'
         new_user['firstname'] = firstname
         new_user['lastname'] = lastname 
 
-
         res = client.put(
             '/user/',
-            json={
-                'old_user': old_user,
-                'new_user': new_user,
-            },
+            json=new_user,
             headers=auth_header,
         )
-        assert res.status_code == 200
         data = res.json() 
+        print(data)
+        assert res.status_code == 200
         assert data['id'] == user_id 
         assert data['email'] == new_user['email']
         assert data['firstname'] == new_user['firstname']
@@ -207,13 +198,3 @@ class TestAuthUsers:
         data = res.json()
         assert data["email"] == user_info['email']
         assert data["id"] == user_id
-
-        user_email = data['email']
-        res = client.get(
-            f"/user/?user_email={user_email}",
-            headers=auth_header, 
-        )
-        assert res.status_code == 200 
-        data = res.json() 
-        assert data['email'] == user_info['email']
-        assert data['id'] == user_id 

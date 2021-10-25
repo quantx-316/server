@@ -10,11 +10,15 @@ def add_obj_to_db(db: Session, obj: Base):
     db.refresh(obj)
 
 
-def update_db_instance(db_instance, old_model: BaseModel, new_model: BaseModel):
+def update_db_instance(db_instance, old_model: BaseModel, new_model: BaseModel, ignore_keys=[]):
 
     diffs = []
 
+    ignores = set(ignore_keys)
+
     for key in db_instance.__table__.columns.keys():
+        if key in ignores:
+            continue 
         old_val = getattr(old_model, key, None)
         new_val = getattr(new_model, key, None)
         if old_val != new_val:

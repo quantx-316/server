@@ -5,7 +5,7 @@ from fastapi import Depends
 from app.db import Base, get_db 
 import app.schemas.users as schemas
 from app.utils.security import password_matching, hash_password, decode_jwt, JWTBearer
-from app.utils.exceptions import AuthenticationException, UserNotFoundException, UpdateException, CreateException
+from app.utils.exceptions import AuthenticationException, UserNotFoundException, UpdateException, CreateException, BadRequestException
 from app.utils.crud import update_db_instance, add_obj_to_db
 
 class Users(Base):
@@ -52,12 +52,12 @@ class Users(Base):
         return db_user
     
     @staticmethod 
-    def update_user(db: Session, old_user: schemas.UsersBase, new_user: schemas.UsersBase):
+    def update_user(db: Session, old_user: schemas.Users, new_user: schemas.Users):
         db_user = Users.get_user_by_email(db, old_user.email)
         if not db_user:
             raise UserNotFoundException
         try: 
-            db_user = update_db_instance(db_user, old_user, new_user)
+            db_user = update_db_instance(db_user, old_user, new_user, ignore_keys=['hashed_password'])
             db.commit() 
         except:
             raise UpdateException
