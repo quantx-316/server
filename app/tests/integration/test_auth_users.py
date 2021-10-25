@@ -198,8 +198,9 @@ class TestAuthUsers:
         auth_header = {"Authorization":  f"Bearer {access_token}"}
 
         user_id = data["id"]
+        username = data["username"]
         res = client.get(
-            f"/user/?user_id={user_id}",
+            f"/user/?username={username}",
             headers=auth_header,
         )
         assert res.status_code == 200

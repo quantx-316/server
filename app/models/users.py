@@ -30,6 +30,10 @@ class Users(Base):
     @staticmethod 
     def get_user_id_from_email(db: Session, email: str):
         return db.query(Users).filter(Users.email == email).first().id 
+    
+    @staticmethod 
+    def get_user_by_username(db: Session, username: str):
+        return db.query(Users).filter(Users.username == username).first() 
 
     @staticmethod
     def get_user_by_email(db: Session, email: str):
@@ -75,11 +79,13 @@ class Users(Base):
 
     @staticmethod 
     def get_auth_user(db: Session = Depends(get_db), token: str = Depends(JWTBearer())):
+
         auth_exception = AuthenticationException("Could not validate credentials")
         try:
             data = decode_jwt(token)
         except:
             raise auth_exception
+        
         email: str = data.get("sub")
         if email is None:
             raise auth_exception
