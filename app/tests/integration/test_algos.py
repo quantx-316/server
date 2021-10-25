@@ -68,14 +68,11 @@ class TestAlgos:
 
         res = client.put(
             "/algo/",
-            json={
-                'old_algo': old_algo, 
-                'new_algo': new_algo,
-            },
+            json=new_algo,
             headers=auth_header, 
         )
 
-        assert res.status_code == 400 
+        assert res.status_code == 404 
     
     def test_update_algo(self):
 
@@ -88,10 +85,7 @@ class TestAlgos:
 
         res = client.put(
             "/algo/",
-            json={
-                'old_algo': old_algo, 
-                'new_algo': new_algo,
-            },
+            json=new_algo,
             headers=auth_header, 
         )
 

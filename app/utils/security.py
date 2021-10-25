@@ -22,7 +22,8 @@ def hash_password(pwd: str) -> str:
 
 def generate_access_token(user_id: dict, expiry_time=timedelta(settings.ACCESS_TOKEN_TTL)):
     encode_data = user_id.copy()
-    encode_data['exp'] = datetime.now() + expiry_time
+    # no exp 
+    # encode_data['exp'] = datetime.now() + expiry_time
     return jwt.encode(encode_data, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 
 

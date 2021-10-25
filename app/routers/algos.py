@@ -27,12 +27,11 @@ def create_algo(
 
 @router.put("/", response_model=algos_schemas.AlgoDB)
 def update_algo(
-    old_algo: algos_schemas.AlgoDB, 
     new_algo: algos_schemas.AlgoDB, 
     user = Depends(users_models.Users.get_auth_user), 
     db: Session = Depends(get_db)
 ):
-    return algos_models.Algorithm.update_algo(db, old_algo, new_algo, user)
+    return algos_models.Algorithm.update_algo(db, new_algo, user)
 
 
 @router.delete("/")

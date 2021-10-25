@@ -6,7 +6,7 @@ from app.db import Base, db as app_db
 import app.schemas.algos as algos_schema 
 import app.schemas.users as users_schema 
 from app.models.users import Users
-from app.utils.crud import add_obj_to_db, update_db_instance
+from app.utils.crud import add_obj_to_db, update_db_instance, update_db_instance_directly
 from app.utils.exceptions import NotOwnerException, AlgoNotFoundException, UpdateException
 
 
@@ -60,17 +60,14 @@ class Algorithm(Base):
         return Algorithm.get_algo_by_id(db, algo_id, owner)
 
     @staticmethod 
-    def update_algo(db: Session, old_algo: algos_schema.AlgoDB, new_algo: algos_schema.AlgoDB, owner: users_schema.Users):
+    def update_algo(db: Session, new_algo: algos_schema.AlgoDB, owner: users_schema.Users):
 
-        if  old_algo.owner != owner.id:
-            raise NotOwnerException
-        
-        db_algo = Algorithm.get_algo_by_id(db, old_algo.id, owner)
+        db_algo = Algorithm.get_algo_by_id(db, new_algo.id, owner)
         if not db_algo: 
             raise AlgoNotFoundException
         
         try: 
-            db_algo = update_db_instance(db_algo, old_algo, new_algo)
+            db_algo = update_db_instance_directly(db_algo, new_algo)
             db.commit()
         except:
             raise UpdateException
