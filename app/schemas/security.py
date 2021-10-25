@@ -1,9 +1,9 @@
 from pydantic import BaseModel
-
+from app.schemas.users import Users
 
 class AuthToken(BaseModel):
     access_token: str
-    token_type: str
+    user: Users 
 
 
 class AuthTokenInfo(BaseModel):

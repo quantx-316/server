@@ -36,7 +36,10 @@ def auth_user_test(username, password):
     assert res.status_code == 200
     data = res.json()
     assert "access_token" in data
-    assert data["token_type"] == "bearer"
+    assert "user" in data 
+    user_data = data['user']
+    assert "username" in user_data 
+    assert user_data['email'] == username 
     return data
 
 

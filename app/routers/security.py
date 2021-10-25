@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from app.models.users import Users
 from app.schemas.security import AuthToken
-from app.schemas.users import UserLogin
+from app.schemas.users import UserLogin, Users as Users_Schema
 from app.utils.security import generate_access_token
 from app.utils.exceptions import AuthenticationException
 from app.db import get_db
@@ -23,5 +23,5 @@ async def get_access_token(db=Depends(get_db), form: OAuth2PasswordRequestForm =
     )
     return AuthToken(**{
         "access_token": access_token,
-        "token_type": "bearer",
+        "user": user,
     })
