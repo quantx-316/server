@@ -1,6 +1,7 @@
 from pydantic.errors import NotNoneError
 from sqlalchemy import Column, String, Integer, ForeignKey, DateTime
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.expression import TextClause 
 
 from app.db import Base, db as app_db
 import app.schemas.algos as algos_schema 
@@ -52,9 +53,12 @@ class Algorithm(Base):
 
         res = db.execute(app_db.validate_sqlstr(f"""
         INSERT INTO ALGORITHM (owner, title, code)
-        VALUES ({owner.id}, '{algo.title}', '{algo.code}')
+        VALUES (:_id, :title, :code)
         RETURNING id
-        """))
+        """).bindparams(
+                _id=owner.id, title=algo.title, code=algo.code
+            )
+        )
         db.commit() 
         algo_id = res.first()[0]
         return Algorithm.get_algo_by_id(db, algo_id, owner)
@@ -78,9 +82,6 @@ class Algorithm(Base):
     @staticmethod 
     def delete_algo(db: Session, algo_id: int, owner: users_schema.Users):
 
-        if algo_id != owner.id: 
-            raise NotOwnerException
-        
         db_algo = Algorithm.get_algo_by_id(db, algo_id, owner)
         db.delete(db_algo)
         db.commit()
