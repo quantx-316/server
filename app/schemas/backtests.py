@@ -19,13 +19,14 @@ class BacktestSubmit(BaseModel):
             raise ValidationError("Interval is not valid")
         return test_interval 
 
-    @validator("test_start", pre=True)
-    def test_start_validate(cls, test_start):
-        return datetime.fromtimestamp(test_start)
+    # may or may not need 
+    # @validator("test_start", pre=True)
+    # def test_start_validate(cls, test_start):
+    #     return datetime.utcfromtimestamp(test_start)
     
-    @validator("test_end", pre=True)
-    def test_end_validate(cls, test_end):
-        return datetime.fromtimestamp(test_end) 
+    # @validator("test_end", pre=True)
+    # def test_end_validate(cls, test_end):
+    #     return datetime.utcfromtimestamp(test_end) 
 
 class Backtest(BacktestSubmit):
     id: int 
