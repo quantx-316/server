@@ -46,12 +46,7 @@ class TestBacktests:
         auth_header = get_auth_user_header(self.auth_user['email'], self.auth_user['password'])
         
         test_start, test_end = get_intervals(self.auth_user)
-
-        print((test_start, test_end))
-
         test_start, test_end = datetime_to_unix(test_start), datetime_to_unix(test_end)
-
-        print((test_start, test_end))
 
         res = client.post(
             "/backtest/",
@@ -63,18 +58,21 @@ class TestBacktests:
             },
             headers=auth_header,
         )
-
+        assert res.status_code == 200 
         data = res.json()
         assert 'id' in data 
-        print(res.json())
-        print(res.status_code)
 
         res = client.get(
             "/backtest/" + str(data['id']),
             headers=auth_header
         )
-
-        data = res.json()
-        print(data)
-
-        assert True is False 
+        assert res.status_code == 200 
+        retrieved_data = res.json()
+        
+        for key in data:
+            assert key in retrieved_data 
+            if key == "result":
+                if data[key] is not None:
+                    assert retrieved_data[key] is not None 
+            else:
+                assert retrieved_data[key] == data[key]
