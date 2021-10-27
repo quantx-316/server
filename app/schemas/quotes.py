@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from pydantic import BaseModel 
+from pydantic import BaseModel, Field
 
 class Quote(BaseModel):
-    time: datetime
+    candle: datetime = Field(alias='time')  # Alias takes priority when populating from ORM (arbitrary instance)
     symbol: str
     price_open: float
     price_high: float
@@ -12,3 +12,4 @@ class Quote(BaseModel):
 
     class Config:
         orm_mode = True
+        allow_population_by_field_name = True   # models.Quote_xx.candle --> schemas.Quote."time"
