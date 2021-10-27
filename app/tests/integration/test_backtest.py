@@ -2,7 +2,7 @@ from copy import deepcopy
 
 from app.tests.client import client
 from app.tests.utils.users import UserGenerator, create_users, get_auth_user_header
-from app.tests.utils.algos import AlgoGenerator, create_algo_test, create_algos
+from app.tests.utils.algos import AlgoGenerator 
 from app.tests.utils.shared import IntegrationClear
 
 
@@ -130,10 +130,43 @@ class TestAlgos:
         return res.json() 
 
     def test_create_algos(self):
-        return create_algos(self.mock_algos, self.mock_users[0])
+        algos = []
+        for mock_algo in self.mock_algos:
+            res = self.create_algo_test(mock_algo)
+            algos.append(res)
+        return algos 
     
     def test_create_algo(self):
 
         test_algo_info = self.mock_algos[0]
 
-        create_algo_test(test_algo_info, self.mock_users[0])
+        self.create_algo_test(test_algo_info)
+
+    def create_algo_test(self, algo_info: dict):
+
+        user = self.mock_users[0]
+        auth_header = get_auth_user_header(user['email'], user['password'])
+
+        res = client.post(
+            '/algo/',
+            json=algo_info,
+            headers=auth_header,
+        )
+
+        assert res.status_code == 200
+
+        data = res.json() 
+        algo_id = data['id']
+
+        res = client.get(
+            f"/algo/?algo_id={algo_id}",
+            headers=auth_header,
+        )
+        assert res.status_code == 200 
+        comp_data = res.json()
+        assert comp_data['id'] == algo_id 
+        assert comp_data['owner'] == data['owner']
+        assert comp_data['code'] == data['code']
+        assert comp_data['title'] == data['title']
+
+        return comp_data 

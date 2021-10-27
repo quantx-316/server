@@ -13,3 +13,7 @@ class IntegrationClear:
     @staticmethod
     def clear_users_table():
         IntegrationClear.truncate_table("USERS")
+
+    @staticmethod 
+    def clear_backtest_table():
+        IntegrationClear.truncate_table("BACKTEST")
