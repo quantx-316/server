@@ -16,7 +16,7 @@ router = APIRouter(
 )
 
 
-@router.post("/", response_model=algos_schemas.AlgoDB)
+@router.post("/", dependencies=[Depends(JWTBearer())], response_model=algos_schemas.AlgoDB)
 def create_algo(
     algo: algos_schemas.AlgoSubmit, 
     user = Depends(users_models.Users.get_auth_user), 
@@ -25,7 +25,7 @@ def create_algo(
     return algos_models.Algorithm.create_algo(db, algo, user)
 
 
-@router.put("/", response_model=algos_schemas.AlgoDB)
+@router.put("/", dependencies=[Depends(JWTBearer())], response_model=algos_schemas.AlgoDB)
 def update_algo(
     new_algo: algos_schemas.AlgoDB, 
     user = Depends(users_models.Users.get_auth_user), 
@@ -34,7 +34,7 @@ def update_algo(
     return algos_models.Algorithm.update_algo(db, new_algo, user)
 
 
-@router.delete("/")
+@router.delete("/", dependencies=[Depends(JWTBearer())])
 def delete_algo(
     algo_id: int, 
     user = Depends(users_models.Users.get_auth_user), 
@@ -43,12 +43,12 @@ def delete_algo(
     return algos_models.Algorithm.delete_algo(db, algo_id, user)
 
 
-@router.get("/all/", response_model=List[algos_schemas.AlgoDB])
+@router.get("/all/", dependencies=[Depends(JWTBearer())], response_model=List[algos_schemas.AlgoDB])
 def get_algos(user=Depends(users_models.Users.get_auth_user), db: Session = Depends(get_db)):
     return algos_models.Algorithm.get_algo_by_user(db, user)
 
 
-@router.get("/", response_model=algos_schemas.AlgoDB)
+@router.get("/", dependencies=[Depends(JWTBearer())], response_model=algos_schemas.AlgoDB)
 def get_algo(algo_id: int, user=Depends(users_models.Users.get_auth_user), db: Session = Depends(get_db)):
     return algos_models.Algorithm.get_algo_by_id(db, algo_id, user)
 
