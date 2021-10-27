@@ -84,19 +84,6 @@ def create_backtest(
 
     return result
 
-# this needs to be removed or isolated 
-@router.put("/", dependencies=[Depends(JWTBearer())])
-def update_backtest(
-    new_backtest: backtests_schemas.Backtest, 
-    user = Depends(users_models.Users.get_auth_user),
-    db: Session = Depends(get_db)
-):
-
-    if new_backtest.owner != user.id:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="You must be owner")
-
-    return backtests_models.Backtest.update_backtest(db, new_backtest, user.id)    
-
 @router.delete("/{backtest_id}", dependencies=[Depends(JWTBearer())])
 def delete_backtest(
     backtest_id: int, 

@@ -29,11 +29,10 @@ class TestBacktests:
         IntegrationClear.clear_backtest_table()
 
     def teardown_method(self):
-        # IntegrationClear.clear_users_table()
-        # IntegrationClear.clear_algos_table()
-        # IntegrationClear.clear_backtest_table()
-        pass 
-    
+        IntegrationClear.clear_users_table()
+        IntegrationClear.clear_algos_table()
+        IntegrationClear.clear_backtest_table()
+
     def test_create_backtest(self):
 
         test_algo_info = self.created_algos[0]
