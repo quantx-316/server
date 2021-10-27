@@ -12,3 +12,9 @@ class Backtest(BaseModel):
     test_start: datetime
     test_end: datetime
     created: datetime
+
+class BacktestSubmit(BaseModel):
+    algo: int 
+    test_interval: str 
+    test_start: datetime 
+    test_end: datetime 
