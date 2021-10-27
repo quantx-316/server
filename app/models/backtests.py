@@ -6,7 +6,7 @@ from app.db import Base, db as app_db
 import app.schemas.backtests as backtests_schema
 import app.schemas.algos as algos_schema
 from app.utils.crud import update_db_instance_directly
-from app.utils.exceptions import UpdateException
+from app.utils.exceptions import NotOwnerException, UpdateException
 
 class Backtest(Base):
     __tablename__ = 'backtest'
@@ -30,8 +30,10 @@ class Backtest(Base):
         return db.query(Backtest).filter(Backtest.owner == owner).all()
 
     @staticmethod
-    def get_backtest(db: Session, backtest_id: int):
-        return db.query(Backtest).filter(Backtest.id == backtest_id).first()
+    def get_backtest(db: Session, backtest_id: int, owner: int):
+        backtest = db.query(Backtest).filter(Backtest.id == backtest_id).first()
+        if backtest.owner != owner:
+            raise NotOwnerException
     
     @staticmethod
     def create_backtest(db: Session, algo: algos_schema.AlgoDB, owner: int, test_interval: str, test_start: datetime, test_end: datetime):
@@ -51,12 +53,12 @@ class Backtest(Base):
         db.commit()
 
         backtest_id = res.first()[0]
-        return Backtest.get_backtest(db, backtest_id)
+        return Backtest.get_backtest(db, backtest_id, owner)
     
     @staticmethod 
     def update_backtest(db: Session, new_backtest: backtests_schema.Backtest, owner: int):
 
-        db_backtest = Backtest.get_backtest(db, new_backtest.id)
+        db_backtest = Backtest.get_backtest(db, new_backtest.id, owner)
         if not db_backtest:
             raise Exception("Placeholder")
         

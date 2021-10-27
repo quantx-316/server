@@ -30,8 +30,8 @@ def get_all_backtests(db: Session = Depends(get_db)):
     return backtests_models.Backtest.get_all_backtests(db)
 
 @router.get("/{backtest_id}", dependencies=[Depends(JWTBearer())])
-def get_backtest(backtest_id: int, db: Session = Depends(get_db)):
-    result = backtests_models.Backtest.get_backtest(db, backtest_id)
+def get_backtest(backtest_id: int, db: Session = Depends(get_db), owner=Depends(users_models.Users.get_auth_user)):
+    result = backtests_models.Backtest.get_backtest(db, backtest_id, owner)
 
     if not result:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Backtest not found")
@@ -39,6 +39,9 @@ def get_backtest(backtest_id: int, db: Session = Depends(get_db)):
     return result
 
 def placeholder_create_background_task(backtest_id: int):
+
+    backtests_models.Backtest.update_backtest()
+
     pass 
 
 @router.post("/", dependencies=[Depends(JWTBearer())])
@@ -84,7 +87,7 @@ def delete_backtest(
     user: users_models.Users = Depends(users_models.Users.get_auth_user),
     db: Session = Depends(get_db)
 ):
-    backtest = backtests_models.Backtest.get_backtest(db=db, backtest_id=backtest_id)
+    backtest = backtests_models.Backtest.get_backtest(db=db, backtest_id=backtest_id, user=user)
     if not backtest or backtest.owner != user.id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Backtest not found")
 
