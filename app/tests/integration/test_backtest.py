@@ -2,16 +2,17 @@ from copy import deepcopy
 
 from app.tests.client import client
 from app.tests.utils.users import UserGenerator, create_users, get_auth_user_header
-from app.tests.utils.algos import AlgoGenerator 
+from app.tests.utils.algos import AlgoGenerator, create_algos
 from app.tests.utils.shared import IntegrationClear
 
 
-class TestAlgos:
+class TestBacktests:
 
     @classmethod
     def setup_class(cls):
         cls.user_generator = UserGenerator()
         cls.mock_users = cls.user_generator.generate_users(2)
+        cls.auth_user = cls.mock_users[0]
         cls.algo_generator = AlgoGenerator()
         cls.mock_algos = cls.algo_generator.generate_algos(3)
 
@@ -23,15 +24,15 @@ class TestAlgos:
         IntegrationClear.clear_users_table()
         create_users(self.mock_users)
         IntegrationClear.clear_algos_table()
+        create_algos(self.mock_algos, self.auth_user)
+        IntegrationClear.clear_backtest_table()
 
     def teardown_method(self):
         IntegrationClear.clear_users_table()
         IntegrationClear.clear_algos_table()
+        IntegrationClear.clear_backtest_table()
     
-    # TODO: (not necessarily required)
-        # need failed create, failed update (diff user than owner), failed delete (diff user)
-        # failed getting of algos for a user if diff user, or have no creds
-            # can do fail because of no creds all at once 
+    
 
     def test_delete_algo(self):
         fetched_algos = self.test_get_algos() 
@@ -141,6 +142,22 @@ class TestAlgos:
         test_algo_info = self.mock_algos[0]
 
         self.create_algo_test(test_algo_info)
+
+
+    def create_backtest_test(self, algo_id: int):
+
+        auth_header = get_auth_user_header(self.auth_user['email'], self.auth_user['password'])
+        
+        res = client.post(
+            "/backtest/",
+            json={
+                "algo": algo_id,
+                "test_interval": "",
+                "test_start": "",
+                "test_end": ""
+            }
+        )
+
 
     def create_algo_test(self, algo_info: dict):
 
