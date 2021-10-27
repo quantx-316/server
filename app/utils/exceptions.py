@@ -64,3 +64,17 @@ async def access_denied_exception_handler(request: Request, exception: AccessDen
 
 
 NotOwnerException = AccessDeniedException("User is not the owner of requested resource")
+
+
+class ServerErrorException(Exception):
+    def __init__(self, msg: str):
+        self.msg = msg 
+
+@app.exception_handler(ServerErrorException)
+async def server_error_exception_handler(request: Request, exception: ServerErrorException):
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"message": exception.msg}
+    )
+
+FailedRetrievalException = ServerErrorException("Failed to retrieve requested items or they do not exist")

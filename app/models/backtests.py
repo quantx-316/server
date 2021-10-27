@@ -7,6 +7,7 @@ import app.schemas.backtests as backtests_schema
 import app.schemas.algos as algos_schema
 from app.utils.crud import update_db_instance_directly
 from app.utils.exceptions import NotOwnerException, UpdateException
+from app.utils.time import validate_test_intervals
 
 class Backtest(Base):
     __tablename__ = 'backtest'
@@ -36,7 +37,10 @@ class Backtest(Base):
             raise NotOwnerException
     
     @staticmethod
-    def create_backtest(db: Session, algo: algos_schema.AlgoDB, owner: int, test_interval: str, test_start: datetime, test_end: datetime):
+    def create_backtest(db: Session, algo: algos_schema.AlgoDB, owner: int, test_interval: str, test_start: datetime, test_end: datetime):        
+
+        validate_test_intervals(db, test_start, test_end)
+
         res = db.execute(app_db.validate_sqlstr(f"""
             INSERT INTO Backtest (algo, owner, code_snapshot, test_interval, test_start, test_end, created)
             VALUES (:algo, :owner, :code_snapshot, :test_interval, :test_start, :test_end, :created)
