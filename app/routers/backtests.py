@@ -18,14 +18,18 @@ router = APIRouter(
     dependencies=[Depends(JWTBearer())]
 )
 
-@router.get("/all/")
+@router.get("/", dependencies=[Depends(JWTBearer())])
+def get_user_backtests(db: Session = Depends(get_db), user=Depends(users_models.Users.get_auth_user)):
+    return backtests_models.Backtest.get_all_user_backtests(db, user.id)
+
+@router.get("/all/", dependencies=[Depends(JWTBearer())])
 def get_all_backtests(db: Session = Depends(get_db)):
     """
     Get all backtests for all users.
     """
     return backtests_models.Backtest.get_all_backtests(db)
 
-@router.get("/{backtest_id}")
+@router.get("/{backtest_id}", dependencies=[Depends(JWTBearer())])
 def get_backtest(backtest_id: int, db: Session = Depends(get_db)):
     result = backtests_models.Backtest.get_backtest(db, backtest_id)
 
@@ -34,7 +38,7 @@ def get_backtest(backtest_id: int, db: Session = Depends(get_db)):
     
     return result
 
-@router.post("/")
+@router.post("/", dependencies=[Depends(JWTBearer())])
 def create_backtest( 
     algo_id: int,
     test_interval: str,
@@ -59,7 +63,7 @@ def create_backtest(
 
     return result
 
-@router.delete("/{backtest_id}")
+@router.delete("/{backtest_id}", dependencies=[Depends(JWTBearer())])
 def delete_backtest(
     backtest_id: int, 
     user: users_models.Users = Depends(users_models.Users.get_auth_user),
