@@ -14,7 +14,7 @@ class Backtest(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     algo = Column(Integer, ForeignKey("algorithm.id"))
-    owner = Column(Integer, ForeignKey("user.id"))
+    owner = Column(Integer, ForeignKey("users.id"))
     result = Column(String)
     code_snapshot = Column(String)
     test_interval = Column(String)
@@ -35,6 +35,7 @@ class Backtest(Base):
         backtest = db.query(Backtest).filter(Backtest.id == backtest_id).first()
         if backtest.owner != owner:
             raise NotOwnerException
+        return backtest 
     
     @staticmethod
     def create_backtest(db: Session, algo: algos_schema.AlgoDB, owner: int, test_interval: str, test_start: datetime, test_end: datetime):        
@@ -70,8 +71,12 @@ class Backtest(Base):
             raise Exception("Cannot change algo it is related to")
         
         try:
-            db_backtest = update_db_instance_directly(db_backtest, new_backtest, ignore_keys=['id'])
-            db_backtest.commit()
+            db_backtest = update_db_instance_directly(
+                db_backtest, 
+                new_backtest, 
+                ignore_keys=['id', 'algo', 'owner', 'test_interval', 'test_start', 'test_end', 'created']
+            )
+            db.commit()
         except:
             raise UpdateException
 

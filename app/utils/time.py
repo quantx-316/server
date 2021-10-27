@@ -1,10 +1,17 @@
-from datetime import datetime 
+from datetime import datetime
+import calendar  
 from sqlalchemy.orm import Session
 from app.utils.quotes import get_min_max_times
 from app.utils.exceptions import BadRequestException
 
 def get_current_time():
     return datetime.now() 
+
+def unix_to_utc_datetime(unix):
+    return datetime.utcfromtimestamp(unix)
+
+def datetime_to_unix(date_time):
+    return calendar.timegm(date_time.timetuple())
 
 def validate_test_intervals(db: Session, start, end):
 

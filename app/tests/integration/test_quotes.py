@@ -4,7 +4,7 @@ from app.tests.client import client
 from app.tests.utils.users import UserGenerator, create_users, get_auth_user_header
 from app.tests.utils.algos import AlgoGenerator, create_algos
 from app.tests.utils.shared import IntegrationClear
-
+from app.tests.utils.quotes import get_intervals
 
 class TestQuotes:
 
@@ -27,15 +27,6 @@ class TestQuotes:
     
     def test_get_intervals(self):
 
-        auth_header = get_auth_user_header(self.auth_user['email'], self.auth_user['password'])
-        
-        res = client.get(
-            "/quote/range/",
-            headers=auth_header,
-        )
+        get_intervals(self.auth_user)
 
-        assert res.status_code == 200
-        data = res.json()
-        assert 'min_time' in data 
-        assert 'max_time' in data 
         

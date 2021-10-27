@@ -1,6 +1,6 @@
 from typing import List
 from datetime import datetime 
-
+import json
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
 
@@ -11,6 +11,7 @@ import app.models.algos as algos_models
 import app.models.users as users_models  
 from app.utils.security import JWTBearer
 from app.utils.exceptions import UserNotFoundException
+from app.utils.time import datetime_to_unix
 from app.db import get_db
 
 router = APIRouter(
@@ -31,25 +32,39 @@ def get_all_backtests(db: Session = Depends(get_db)):
 
 @router.get("/{backtest_id}", dependencies=[Depends(JWTBearer())])
 def get_backtest(backtest_id: int, db: Session = Depends(get_db), owner=Depends(users_models.Users.get_auth_user)):
-    result = backtests_models.Backtest.get_backtest(db, backtest_id, owner)
+    result = backtests_models.Backtest.get_backtest(db, backtest_id, owner.id)
 
     if not result:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Backtest not found")
     
     return result
 
-def placeholder_create_background_task(backtest_id: int):
-
-    backtests_models.Backtest.update_backtest()
-
-    pass 
+def placeholder_create_background_task(backtest_id: int, owner: int, db: Session):
+    backtest = backtests_models.Backtest.get_backtest(db, backtest_id, owner)
+    new_backtest = {
+        "id": backtest.id,
+        "algo": backtest.algo,
+        "owner": backtest.owner,
+        "result": json.dumps({"message": "test"}, indent=4),
+        "code_snapshot": backtest.code_snapshot,
+        "test_interval": backtest.test_interval,
+        "test_start": datetime_to_unix(backtest.test_start),
+        "test_end": datetime_to_unix(backtest.test_end),
+        "created": backtest.created,
+    }
+    new_backtest = backtests_schemas.Backtest(**new_backtest)
+    backtests_models.Backtest.update_backtest(
+        db,
+        new_backtest,
+        owner
+    ) 
 
 @router.post("/", dependencies=[Depends(JWTBearer())])
 def create_backtest( 
     submitted: backtests_schemas.BacktestSubmit,
+    background_task: BackgroundTasks,
     user: users_models.Users = Depends(users_models.Users.get_auth_user),
     db: Session = Depends(get_db),
-    background_task = BackgroundTasks 
 ):
     algo = algos_models.Algorithm.get_algo_by_id(db=db, algo_id=submitted.algo, owner=user)
     if not algo:
@@ -65,10 +80,11 @@ def create_backtest(
     if not result:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create backtest")
 
-    background_task.add_task(placeholder_create_background_task, result.id)
+    background_task.add_task(placeholder_create_background_task, result.id, user.id, db)
 
     return result
 
+# this needs to be removed or isolated 
 @router.put("/", dependencies=[Depends(JWTBearer())])
 def update_backtest(
     new_backtest: backtests_schemas.Backtest, 

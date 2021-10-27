@@ -1,7 +1,8 @@
 from typing import Any, Optional
-from pydantic import BaseModel, validator, ValidationError 
 from datetime import datetime 
 
+from pydantic import BaseModel, validator, ValidationError 
+from app.utils.time import unix_to_utc_datetime
 from app.utils.constants import IntervalName 
 
 intervals = [interval.value for interval in IntervalName]
@@ -22,11 +23,11 @@ class BacktestSubmit(BaseModel):
     # may need extra validation on the allowed min / max dates 
     @validator("test_start", pre=True)
     def test_start_validate(cls, test_start):
-        return datetime.utcfromtimestamp(test_start)
+        return unix_to_utc_datetime(test_start)
     
     @validator("test_end", pre=True)
     def test_end_validate(cls, test_end):
-        return datetime.utcfromtimestamp(test_end) 
+        return unix_to_utc_datetime(test_end)
 
 class Backtest(BacktestSubmit):
     id: int 
