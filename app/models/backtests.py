@@ -5,6 +5,8 @@ from sqlalchemy.orm import Session
 from app.db import Base, db as app_db
 import app.schemas.backtests as backtests_schema
 import app.schemas.algos as algos_schema
+from app.utils.crud import update_db_instance_directly
+from app.utils.exceptions import UpdateException
 
 class Backtest(Base):
     __tablename__ = 'backtest'
@@ -50,6 +52,22 @@ class Backtest(Base):
 
         backtest_id = res.first()[0]
         return Backtest.get_backtest(db, backtest_id)
+    
+    @staticmethod 
+    def update_backtest(db: Session, new_backtest: backtests_schema.Backtest, owner: int):
+
+        db_backtest = Backtest.get_backtest(db, new_backtest.id)
+        if not db_backtest:
+            raise Exception("Placeholder")
+        
+        try:
+            db_backtest = update_db_instance_directly(db_backtest, new_backtest)
+            db_backtest.commit()
+        except:
+            raise UpdateException
+
+        db.refresh(db_backtest)
+        return db_backtest 
 
     @staticmethod
     def set_backtest_result(db: Session, backtest_id: int, result: str):

@@ -63,6 +63,14 @@ def create_backtest(
 
     return result
 
+@router.put("/", dependencies=[Depends(JWTBearer())])
+def update_backtest(
+    new_backtest: backtests_schemas.Backtest, 
+    user = Depends(users_models.Users.get_auth_user),
+    db: Session = Depends(get_db)
+):
+    return backtests_models.Backtest.update_backtest(db, new_backtest, user.id)    
+
 @router.delete("/{backtest_id}", dependencies=[Depends(JWTBearer())])
 def delete_backtest(
     backtest_id: int, 
