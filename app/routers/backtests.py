@@ -1,7 +1,7 @@
 from typing import List
 from datetime import datetime 
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
 
 import app.models.backtests as backtests_models
@@ -38,16 +38,17 @@ def get_backtest(backtest_id: int, db: Session = Depends(get_db)):
     
     return result
 
+def placeholder_create_background_task(backtest_id: int):
+    pass 
+
 @router.post("/", dependencies=[Depends(JWTBearer())])
 def create_backtest( 
-    algo_id: int,
-    test_interval: str,
-    test_start: datetime,
-    test_end: datetime,
+    submitted: backtests_schemas.BacktestSubmit,
     user: users_models.Users = Depends(users_models.Users.get_auth_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    background_task = BackgroundTasks 
 ):
-    algo = algos_models.Algorithm.get_algo_by_id(db=db, algo_id=algo_id, owner=user)
+    algo = algos_models.Algorithm.get_algo_by_id(db=db, algo_id=submitted.algo, owner=user)
     if not algo:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Algorithm not found")
 
@@ -55,11 +56,13 @@ def create_backtest(
         db=db, 
         algo=algo, 
         owner=user.id,
-        test_interval=test_interval, 
-        test_start=test_start, 
-        test_end=test_end)
+        test_interval=submitted.test_interval, 
+        test_start=submitted.test_start, 
+        test_end=submitted.test_end)
     if not result:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create backtest")
+
+    background_task.add_task(placeholder_create_background_task, result.id)
 
     return result
 
@@ -69,6 +72,10 @@ def update_backtest(
     user = Depends(users_models.Users.get_auth_user),
     db: Session = Depends(get_db)
 ):
+
+    if new_backtest.owner != user.id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="You must be owner")
+
     return backtests_models.Backtest.update_backtest(db, new_backtest, user.id)    
 
 @router.delete("/{backtest_id}", dependencies=[Depends(JWTBearer())])

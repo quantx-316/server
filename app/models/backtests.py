@@ -60,8 +60,11 @@ class Backtest(Base):
         if not db_backtest:
             raise Exception("Placeholder")
         
+        if new_backtest.algo != db_backtest.algo:
+            raise Exception("Cannot change algo it is related to")
+        
         try:
-            db_backtest = update_db_instance_directly(db_backtest, new_backtest)
+            db_backtest = update_db_instance_directly(db_backtest, new_backtest, ignore_keys=['id'])
             db_backtest.commit()
         except:
             raise UpdateException
