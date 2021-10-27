@@ -12,4 +12,8 @@ class Quote(BaseModel):
 
     class Config:
         orm_mode = True
-        allow_population_by_field_name = True   # models.Quote_xx.candle --> schemas.Quote."time"
+        allow_population_by_field_name = True   
+        
+        # models.Quote_xx.candle --> schemas.Quote."time"
+        # We want the user to see "time", but schema must generate "candle" because "time" 
+        # is a name conflict when defining the view. 

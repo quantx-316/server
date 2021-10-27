@@ -17,9 +17,10 @@ app.add_middleware(
 )
 
 # import needs to be here or crash 
-from .routers import users, security, algos, quotes
+from .routers import users, security, algos, quotes, backtests 
 
 app.include_router(users.router)
 app.include_router(security.router)
 app.include_router(algos.router)
 app.include_router(quotes.router)
+app.include_router(backtests.router)
