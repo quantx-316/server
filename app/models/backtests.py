@@ -33,7 +33,7 @@ class Backtest(Base):
     @staticmethod
     def get_backtest(db: Session, backtest_id: int, owner: int):
         backtest = db.query(Backtest).filter(Backtest.id == backtest_id).first()
-        if backtest.owner != owner:
+        if backtest and backtest.owner != owner:
             raise NotOwnerException
         return backtest 
     

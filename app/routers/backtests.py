@@ -90,7 +90,7 @@ def delete_backtest(
     user: users_models.Users = Depends(users_models.Users.get_auth_user),
     db: Session = Depends(get_db)
 ):
-    backtest = backtests_models.Backtest.get_backtest(db=db, backtest_id=backtest_id, user=user)
+    backtest = backtests_models.Backtest.get_backtest(db=db, backtest_id=backtest_id, owner=user.id)
     if not backtest or backtest.owner != user.id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Backtest not found")
 

@@ -32,12 +32,51 @@ class TestBacktests:
         IntegrationClear.clear_users_table()
         IntegrationClear.clear_algos_table()
         IntegrationClear.clear_backtest_table()
+    
+    def test_delete_backtest(self):
+        auth_header = get_auth_user_header(self.auth_user['email'], self.auth_user['password'])
+        backtest = self.test_create_backtest()
+
+        res = client.delete(
+            "/backtest/" + str(backtest['id']),
+            headers=auth_header,
+        )
+        print(res.status_code)
+        assert res.status_code == 200 
+
+        res = client.get(
+            "/backtest/" + str(backtest['id']),
+            headers=auth_header
+        )
+        assert res.status_code != 201  
+    
+    def test_get_user_backtests(self):
+        results = self.test_create_backtests()
+
+        ids = [result['id'] for result in results]
+
+        auth_header = get_auth_user_header(self.auth_user['email'], self.auth_user['password'])
+        res = client.get(
+            "/backtest/",
+            headers=auth_header,
+        )
+        data = res.json()
+        assert res.status_code == 200
+        for test in data:
+            assert test['id'] in ids 
+    
+    def test_create_backtests(self):
+        results = []
+        for _ in range(3):
+            res = self.test_create_backtest()
+            results.append(res)
+        return results 
 
     def test_create_backtest(self):
 
         test_algo_info = self.created_algos[0]
 
-        self.create_backtest_test(test_algo_info['id'])
+        return self.create_backtest_test(test_algo_info['id'])
 
 
     def create_backtest_test(self, algo_id: int):
@@ -75,3 +114,5 @@ class TestBacktests:
                     assert retrieved_data[key] is not None 
             else:
                 assert retrieved_data[key] == data[key]
+
+        return retrieved_data 
