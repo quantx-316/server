@@ -2,6 +2,10 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
+class QuoteTimeRange(BaseModel):
+    min_time: datetime 
+    max_time: datetime 
+
 class Quote(BaseModel):
     candle: datetime = Field(alias='time')  # Alias takes priority when populating from ORM (arbitrary instance)
     symbol: str

@@ -6,12 +6,27 @@ from sqlalchemy.orm import Session
 
 import app.schemas.quotes as schemas
 import app.models.quotes as models 
-
-from app.db import get_db
+from app.utils.security import JWTBearer
+from app.db import get_db, db as app_db 
 
 from app.utils.constants import IntervalName
 
 router = APIRouter()
+
+@router.get("/quote/range/", dependencies=[Depends(JWTBearer())], response_model=schemas.QuoteTimeRange)
+def get_allowed_quote_time_range(db: Session = Depends(get_db)):
+    res = db.execute(app_db.validate_sqlstr("""
+        SELECT MIN(time), MAX(time) FROM Quote
+    """))
+    rows = [row for row in res]
+    if not rows:
+        raise HTTPException(status_code=500, detail="Failed to get quotes information or does not exist")
+    min_, max_ = rows[0]
+    return {
+        "min_time": min_,
+        "max_time": max_, 
+    }
+
 
 # Note: interval refers to candle size, not a set of quotes 
 @router.get("/quote/{interval}/{symbol}", response_model=schemas.Quote)
