@@ -38,14 +38,14 @@ class TestBacktests:
         backtest = self.test_create_backtest()
 
         res = client.delete(
-            "/backtest/" + str(backtest['id']),
+            "/backtest/" + "?backtest_id=" + str(backtest['id']),
             headers=auth_header,
         )
         print(res.status_code)
         assert res.status_code == 200 
 
         res = client.get(
-            "/backtest/" + str(backtest['id']),
+            "/backtest/" + "?backtest_id=" + str(backtest['id']),
             headers=auth_header
         )
         assert res.status_code != 201  
@@ -101,7 +101,7 @@ class TestBacktests:
         assert 'id' in data 
 
         res = client.get(
-            "/backtest/" + str(data['id']),
+            "/backtest/" + "?backtest_id=" + str(data['id']),
             headers=auth_header
         )
         assert res.status_code == 200 

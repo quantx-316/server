@@ -35,7 +35,7 @@ def get_all_backtests(db: Session = Depends(get_db)):
     """
     return backtests_models.Backtest.get_all_backtests(db)
 
-@router.get("/{backtest_id}", dependencies=[Depends(JWTBearer())])
+@router.get("/", dependencies=[Depends(JWTBearer())])
 def get_backtest(backtest_id: int, db: Session = Depends(get_db), owner=Depends(users_models.Users.get_auth_user)):
     result = backtests_models.Backtest.get_backtest(db, backtest_id, owner.id)
 
@@ -89,7 +89,7 @@ def create_backtest(
 
     return result
 
-@router.delete("/{backtest_id}", dependencies=[Depends(JWTBearer())])
+@router.delete("/", dependencies=[Depends(JWTBearer())])
 def delete_backtest(
     backtest_id: int, 
     user: users_models.Users = Depends(users_models.Users.get_auth_user),
