@@ -27,6 +27,10 @@ class Backtest(Base):
         return db.query(Backtest).all()
     
     @staticmethod 
+    def get_all_algo_backtests(db: Session, algo_id: int):
+        return db.query(Backtest).filter(Backtest.algo == algo_id).all()
+    
+    @staticmethod 
     def get_all_user_backtests(db: Session, owner: int):
         return db.query(Backtest).filter(Backtest.owner == owner).all()
 

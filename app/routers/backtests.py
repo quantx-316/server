@@ -19,9 +19,14 @@ router = APIRouter(
     dependencies=[Depends(JWTBearer())]
 )
 
+# backtests by user or by algo_id
 @router.get("/", dependencies=[Depends(JWTBearer())])
-def get_user_backtests(db: Session = Depends(get_db), user=Depends(users_models.Users.get_auth_user)):
-    return backtests_models.Backtest.get_all_user_backtests(db, user.id)
+def get_specific_backtests(algo_id: int = None, db: Session = Depends(get_db), user=Depends(users_models.Users.get_auth_user)):
+
+    if algo_id is None: 
+        return backtests_models.Backtest.get_all_user_backtests(db, user.id)
+    
+    return backtests_models.Backtest.get_all_algo_backtests(db, algo_id)
 
 @router.get("/all/", dependencies=[Depends(JWTBearer())])
 def get_all_backtests(db: Session = Depends(get_db)):
