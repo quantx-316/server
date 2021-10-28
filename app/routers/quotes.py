@@ -22,6 +22,10 @@ def get_allowed_quote_time_range(db: Session = Depends(get_db)):
         "max_time": max_, 
     }
 
+@router.get("/quote/intervals/", dependencies=[Depends(JWTBearer())])
+def get_intervals():
+    return IntervalName.get_mapping()
+
 # Note: interval refers to candle size, not a set of quotes 
 @router.get("/quote/{interval}/{symbol}", response_model=schemas.Quote)
 def get_single_quote(symbol: str, interval: IntervalName, time: datetime, db: Session = Depends(get_db)):
