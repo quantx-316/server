@@ -33,6 +33,10 @@ class Backtest(Base):
     @staticmethod 
     def get_all_user_backtests(db: Session, owner: int):
         return db.query(Backtest).filter(Backtest.owner == owner).all()
+    
+    @staticmethod 
+    def get_all_pending_user_backtests(db: Session, owner: int):
+        return db.query(Backtest).filter(Backtest.owner == owner, Backtest.result == None).all()
 
     @staticmethod
     def get_backtest(db: Session, backtest_id: int, owner: int):

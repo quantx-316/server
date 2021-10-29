@@ -13,6 +13,8 @@ from app.utils.security import JWTBearer
 from app.utils.exceptions import UserNotFoundException
 from app.utils.time import datetime_to_unix
 from app.db import get_db
+# from app.routers.notifs import send_notification
+import time
 
 router = APIRouter(
     prefix="/backtest",
@@ -35,6 +37,10 @@ def get_all_backtests(db: Session = Depends(get_db)):
     """
     return backtests_models.Backtest.get_all_backtests(db)
 
+@router.get("/pending/")
+def get_pending_backtests(db: Session = Depends(get_db), user=Depends(users_models.Users.get_auth_user)):
+    return backtests_models.Backtest.get_all_pending_user_backtests(db, user.id)
+
 @router.get("/", dependencies=[Depends(JWTBearer())])
 def get_backtest(backtest_id: int, db: Session = Depends(get_db), owner=Depends(users_models.Users.get_auth_user)):
     result = backtests_models.Backtest.get_backtest(db, backtest_id, owner.id)
@@ -44,7 +50,11 @@ def get_backtest(backtest_id: int, db: Session = Depends(get_db), owner=Depends(
     
     return result
 
+
 def placeholder_create_background_task(backtest_id: int, owner: int, db: Session):
+
+    start = time.time()
+
     backtest = backtests_models.Backtest.get_backtest(db, backtest_id, owner)
     new_backtest = {
         "id": backtest.id,
@@ -58,11 +68,16 @@ def placeholder_create_background_task(backtest_id: int, owner: int, db: Session
         "created": backtest.created,
     }
     new_backtest = backtests_schemas.Backtest(**new_backtest)
+    while True:
+        end = time.time()
+        if (end-start) > 5:
+            break         
     backtests_models.Backtest.update_backtest(
         db,
         new_backtest,
         owner
     ) 
+
 
 @router.post("/", dependencies=[Depends(JWTBearer())])
 def create_backtest( 
