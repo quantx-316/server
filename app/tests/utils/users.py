@@ -24,8 +24,11 @@ def create_user(user_info: dict):
 
 
 def create_users(user_infos: List[dict]): 
+    all_info = []
     for user_info in user_infos:
-        create_user(user_info)
+        user_data = create_user(user_info)
+        all_info.append(user_data)
+    return all_info 
 
 
 def auth_user_test(username, password):

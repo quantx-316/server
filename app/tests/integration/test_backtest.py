@@ -6,6 +6,7 @@ from app.tests.utils.algos import AlgoGenerator, create_algos
 from app.tests.utils.shared import IntegrationClear
 from app.tests.utils.quotes import get_intervals 
 from app.utils.time import datetime_to_unix
+from app.tests.utils.backtests import create_backtest_test
 
 class TestBacktests:
 
@@ -75,44 +76,7 @@ class TestBacktests:
     def test_create_backtest(self):
 
         test_algo_info = self.created_algos[0]
+        start, end = get_intervals(self.auth_user)
+        start, end = datetime_to_unix(start), datetime_to_unix(end)
 
-        return self.create_backtest_test(test_algo_info['id'])
-
-
-    def create_backtest_test(self, algo_id: int):
-
-        auth_header = get_auth_user_header(self.auth_user['email'], self.auth_user['password'])
-        
-        test_start, test_end = get_intervals(self.auth_user)
-        test_start, test_end = datetime_to_unix(test_start), datetime_to_unix(test_end)
-
-        res = client.post(
-            "/backtest/",
-            json={
-                "algo": algo_id,
-                "test_interval": "1m",
-                "test_start": test_start,
-                "test_end": test_end
-            },
-            headers=auth_header,
-        )
-        assert res.status_code == 200 
-        data = res.json()
-        assert 'id' in data 
-
-        res = client.get(
-            "/backtest/" + "?backtest_id=" + str(data['id']),
-            headers=auth_header
-        )
-        assert res.status_code == 200 
-        retrieved_data = res.json()
-        
-        for key in data:
-            assert key in retrieved_data 
-            if key == "result":
-                if data[key] is not None:
-                    assert retrieved_data[key] is not None 
-            else:
-                assert retrieved_data[key] == data[key]
-
-        return retrieved_data 
+        return create_backtest_test(test_algo_info['id'], self.auth_user, start, end)

@@ -6,6 +6,20 @@ class IntegrationClear:
     def truncate_table(table_name: str):
         db.execute(f"TRUNCATE TABLE {table_name} RESTART IDENTITY CASCADE;")
 
+    @staticmethod 
+    def clear_all_tables():
+        table_names = [
+            "USERS",
+            "ALGORITHM",
+            "BACKTEST",
+            "COMPETITION",
+            "CompetitionEnrollment",
+            "CompetitionEntry",
+        ]
+
+        for table_name in table_names:
+            IntegrationClear.truncate_table(table_name)
+
     @staticmethod
     def clear_algos_table():
         IntegrationClear.truncate_table("ALGORITHM")
