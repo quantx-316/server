@@ -16,6 +16,7 @@ class Backtest(Base):
     algo = Column(Integer, ForeignKey("algorithm.id"))
     owner = Column(Integer, ForeignKey("users.id"))
     result = Column(String)
+    score = Column(Integer)
     code_snapshot = Column(String)
     test_interval = Column(String)
     test_start = Column(DateTime)

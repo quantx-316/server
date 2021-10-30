@@ -33,5 +33,6 @@ class Backtest(BacktestSubmit):
     id: int 
     owner: int
     result: Optional[str]
+    score: Optional[int]
     code_snapshot: str
     created: datetime

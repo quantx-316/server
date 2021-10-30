@@ -18,6 +18,7 @@ from app.utils.time import datetime_to_unix
 from app.db import get_db
 # from app.routers.notifs import send_notification
 import time
+import random 
 
 router = APIRouter(
     prefix="/backtest",
@@ -65,6 +66,7 @@ def placeholder_create_background_task(backtest_id: int, owner: int, db: Session
         "algo": backtest.algo,
         "owner": backtest.owner,
         "result": json.dumps({"message": "test"}, indent=4),
+        "score": random.randint(0,100),
         "code_snapshot": backtest.code_snapshot,
         "test_interval": backtest.test_interval,
         "test_start": datetime_to_unix(backtest.test_start),
