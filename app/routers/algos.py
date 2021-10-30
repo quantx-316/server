@@ -2,6 +2,8 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from fastapi_pagination import Page, Params 
+from fastapi_pagination.ext.sqlalchemy import paginate 
 
 import app.schemas.algos as algos_schemas
 import app.models.algos as algos_models
@@ -43,9 +45,14 @@ def delete_algo(
     return algos_models.Algorithm.delete_algo(db, algo_id, user)
 
 
-@router.get("/all/", dependencies=[Depends(JWTBearer())], response_model=List[algos_schemas.AlgoDB])
-def get_algos(user=Depends(users_models.Users.get_auth_user), db: Session = Depends(get_db)):
-    return algos_models.Algorithm.get_algo_by_user(db, user)
+@router.get("/all/", dependencies=[Depends(JWTBearer())], response_model=Page[algos_schemas.AlgoDB])
+def get_algos(
+    user=Depends(users_models.Users.get_auth_user), 
+    db: Session = Depends(get_db),
+    params: Params = Depends() 
+):
+    query = algos_models.Algorithm.get_algo_by_user(db, user)
+    return paginate(query, params)
 
 
 @router.get("/", dependencies=[Depends(JWTBearer())], response_model=algos_schemas.AlgoDB)

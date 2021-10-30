@@ -40,7 +40,8 @@ class Algorithm(Base):
 
     @staticmethod 
     def get_algo_by_user(db: Session, owner: users_schema.Users):
-        return db.query(Algorithm).filter(Algorithm.owner == owner.id).all()
+        # returns QUERY to you, not the results 
+        return db.query(Algorithm).filter(Algorithm.owner == owner.id)
 
     @staticmethod 
     def create_algo(db: Session, algo: algos_schema.AlgoSubmit, owner: users_schema.Users):

@@ -24,15 +24,18 @@ class Backtest(Base):
 
     @staticmethod
     def get_all_backtests(db: Session):
-        return db.query(Backtest).all()
+        # returns QUERY not results 
+        return db.query(Backtest)
     
     @staticmethod 
     def get_all_algo_backtests(db: Session, algo_id: int):
-        return db.query(Backtest).filter(Backtest.algo == algo_id).all()
+        # returns QUERY not results 
+        return db.query(Backtest).filter(Backtest.algo == algo_id)
     
     @staticmethod 
     def get_all_user_backtests(db: Session, owner: int):
-        return db.query(Backtest).filter(Backtest.owner == owner).all()
+        # returns QUERY not results 
+        return db.query(Backtest).filter(Backtest.owner == owner)
     
     @staticmethod 
     def get_all_pending_user_backtests(db: Session, owner: int):

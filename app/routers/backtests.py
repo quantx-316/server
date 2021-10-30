@@ -4,6 +4,9 @@ import json
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
 
+from fastapi_pagination import Page, Params 
+from fastapi_pagination.ext.sqlalchemy import paginate 
+
 import app.models.backtests as backtests_models
 import app.schemas.backtests as backtests_schemas
 import app.schemas.algos as algos_schemas
@@ -22,20 +25,21 @@ router = APIRouter(
 )
 
 # backtests by user or by algo_id
-@router.get("/", dependencies=[Depends(JWTBearer())])
-def get_specific_backtests(algo_id: int = None, db: Session = Depends(get_db), user=Depends(users_models.Users.get_auth_user)):
+@router.get("/", dependencies=[Depends(JWTBearer())]) # Page[Backtest]
+def get_specific_backtests(algo_id: int = None, db: Session = Depends(get_db), user=Depends(users_models.Users.get_auth_user), params: Params = Depends()):
 
     if algo_id is None: 
-        return backtests_models.Backtest.get_all_user_backtests(db, user.id)
+        return paginate(backtests_models.Backtest.get_all_user_backtests(db, user.id), params)
     
-    return backtests_models.Backtest.get_all_algo_backtests(db, algo_id)
+    return paginate(backtests_models.Backtest.get_all_algo_backtests(db, algo_id), params)
 
 @router.get("/all/", dependencies=[Depends(JWTBearer())])
-def get_all_backtests(db: Session = Depends(get_db)):
+def get_all_backtests(db: Session = Depends(get_db), params: Params = Depends()):
     """
     Get all backtests for all users.
     """
-    return backtests_models.Backtest.get_all_backtests(db)
+    query = backtests_models.Backtest.get_all_backtests(db)
+    return paginate(query, params)
 
 @router.get("/pending/")
 def get_pending_backtests(db: Session = Depends(get_db), user=Depends(users_models.Users.get_auth_user)):
