@@ -68,10 +68,13 @@ class UserGenerator:
         self._password = "password"
 
     def generate_fake_users_csv(self, num_users):
+        desired_keys = ['username', 'email', 'hashed_password']
+        generated_users = self.generate_users(num_users)
         FileWriter.write_csv_to_path(
             app.tests.constants.DEFAULT_FAKE_USER_CSV_OUTPUT,
-            [[str(val) for key, val in user.items() if key != "password"] for user in self.generate_users(num_users)]
+            [[str(user[key]) for key in desired_keys] for user in generated_users]
         )
+        return generated_users 
 
     def generate_fake_users_json(self, num_users):
         FileWriter.write_json_to_path(

@@ -7,6 +7,8 @@ from app.tests.utils.shared import IntegrationClear
 from app.tests.utils.quotes import get_intervals 
 from app.utils.time import datetime_to_unix
 from app.tests.utils.backtests import create_backtest_test
+import pprint 
+
 
 class TestBacktests:
 
@@ -54,6 +56,8 @@ class TestBacktests:
     def test_get_user_backtests(self):
         results = self.test_create_backtests()
 
+        pprint.pprint(results)
+
         ids = [result['id'] for result in results]
 
         auth_header = get_auth_user_header(self.auth_user['email'], self.auth_user['password'])
@@ -63,7 +67,7 @@ class TestBacktests:
         )
         data = res.json()
         assert res.status_code == 200
-        for test in data:
+        for test in data['items']:
             assert test['id'] in ids 
     
     def test_create_backtests(self):

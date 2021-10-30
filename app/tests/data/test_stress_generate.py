@@ -1,5 +1,7 @@
+from sqlalchemy.sql.functions import user
 from app.tests.utils.users import UserGenerator, create_users, get_auth_user_header
-from app.tests.utils.algos import AlgoGenerator, create_algos
+from app.tests.utils.algos import AlgoGenerator, create_algos_lite
+from app.tests.utils.backtests import create_backtest_test
 from app.tests.utils.quotes import get_intervals 
 from app.utils.time import unix_to_utc_datetime
 from app.tests.utils.shared import IntegrationClear
@@ -13,13 +15,18 @@ def generate_backtests(
     min_, max_,
     user_to_algo,
 ):
-    pass 
+
+    for user_id in user_to_algo:
+        algos = user_to_algo[user_id]['algos']
+        user_info = user_to_algo[user_id]['user_obj']
+        create_backtest_test(algos['id'], user_info, min_, max_)
+
 
 def generate_algos(users):
     mock_algos = AlgoGenerator().generate_algos(NUM_ALGOS_PER_USER)
     user_to_algo = {}
     for user in users:
-        algos = create_algos(mock_algos, user)
+        algos = create_algos_lite(mock_algos, user)
         user_to_algo[user['id']] = {
             'user_obj': user,
             'algos': algos,
@@ -29,7 +36,7 @@ def generate_algos(users):
 def generate_users():
     mock_users = UserGenerator().generate_users(NUM_USERS)
     users = create_users(mock_users)
-    return users  
+    return (users, mock_users)  
 
 def generate_stress_data():
 
@@ -37,12 +44,12 @@ def generate_stress_data():
     IntegrationClear.clear_all_tables()
 
     # GENERATE USERS
-    users = generate_users() 
+    users, mock_users = generate_users() 
 
     # GENERATE ALGORITHMS 
-    user_to_algo = generate_algos(users)
+    user_to_algo = generate_algos(mock_users)
 
-    min_, max_ = get_intervals(users[0])
+    min_, max_ = get_intervals(mock_users[0])
     min_, max_ = unix_to_utc_datetime(min_), unix_to_utc_datetime(max_)
 
     # GENERATE BACKTESTS WITH MAX INTERVALS
@@ -51,5 +58,11 @@ def generate_stress_data():
     # GENERATE COMPETITIONS 
 
 
-if __name__ == "__main__":
-    generate_stress_data()
+class TestStress:
+
+    @classmethod
+    def setup_class(cls):
+        generate_stress_data()
+    
+    def test_placeholder(self):
+        pass 

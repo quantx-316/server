@@ -5,6 +5,8 @@ from app.tests.utils.users import UserGenerator, create_users, get_auth_user_hea
 from app.tests.utils.algos import AlgoGenerator, create_algo_test, create_algos
 from app.tests.utils.shared import IntegrationClear
 
+import pprint 
+
 
 class TestAlgos:
 
@@ -106,6 +108,10 @@ class TestAlgos:
     def test_get_algos(self):
         orig_algos = self.test_create_algos()
         fetched_algos = self.get_algos_test() 
+
+        pprint.pprint(orig_algos)
+        pprint.pprint(fetched_algos)
+
         assert len(orig_algos) == len(fetched_algos)
         orig_algo_mapping = {algo['id'] : algo for algo in orig_algos}
         for fetched_algo in fetched_algos:
@@ -127,7 +133,7 @@ class TestAlgos:
         )
 
         assert res.status_code == 200 
-        return res.json() 
+        return res.json()['items']
 
     def test_create_algos(self):
         return create_algos(self.mock_algos, self.mock_users[0])
