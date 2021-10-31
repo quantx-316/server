@@ -116,3 +116,14 @@ class Backtest(Base):
             id=backtest_id
         ))
         db.commit()
+
+    @staticmethod
+    def sorting_attributes_to_col():
+
+        return {
+            "score": Backtest.score,
+            "test_interval": Backtest.test_interval,
+            "test_start": Backtest.test_start,
+            "test_end": Backtest.test_end,
+            "created": Backtest.created,
+        }

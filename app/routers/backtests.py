@@ -17,6 +17,7 @@ from app.utils.exceptions import UserNotFoundException
 from app.utils.time import datetime_to_unix
 from app.db import get_db
 # from app.routers.notifs import send_notification
+from app.utils.sorting import sort_encapsulate_query
 import time
 import random 
 
@@ -27,12 +28,27 @@ router = APIRouter(
 
 # backtests by user or by algo_id
 @router.get("/", dependencies=[Depends(JWTBearer())]) # Page[Backtest]
-def get_specific_backtests(algo_id: int = None, db: Session = Depends(get_db), user=Depends(users_models.Users.get_auth_user), params: Params = Depends()):
+def get_specific_backtests(
+        algo_id: int = None,
+        db: Session = Depends(get_db),
+        user=Depends(users_models.Users.get_auth_user),
+        params: Params = Depends(),
+        sort_by: str = None,
+        sort_direction: str = None
+):
+    if algo_id is None:
+        query = backtests_models.Backtest.get_all_user_backtests(db, user.id)
+    else:
+        query = backtests_models.Backtest.get_all_algo_backtests(db, algo_id)
 
-    if algo_id is None: 
-        return paginate(backtests_models.Backtest.get_all_user_backtests(db, user.id), params)
-    
-    return paginate(backtests_models.Backtest.get_all_algo_backtests(db, algo_id), params)
+    query = sort_encapsulate_query(
+        sort_by,
+        sort_direction,
+        backtests_models.Backtest.sorting_attributes_to_col(),
+        query,
+    )
+
+    return paginate(query, params)
 
 @router.get("/all/", dependencies=[Depends(JWTBearer())])
 def get_all_backtests(db: Session = Depends(get_db), params: Params = Depends()):
