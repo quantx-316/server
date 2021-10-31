@@ -26,7 +26,7 @@ router = APIRouter(
     dependencies=[Depends(JWTBearer())]
 )
 
-# backtests by user or by algo_id
+# backtests by user or by algo_id or by backtest_id
 @router.get("/", dependencies=[Depends(JWTBearer())]) # Page[Backtest] or Backtest
 def get_specific_backtests(
         algo_id: int = None,
@@ -54,14 +54,16 @@ def get_specific_backtests(
 
     return paginate(query, params)
 
-@router.get("/all/", dependencies=[Depends(JWTBearer())])
-def get_all_backtests(db: Session = Depends(get_db), params: Params = Depends()):
-    """
-    Get all backtests for all users.
-    """
-    query = backtests_models.Backtest.get_all_backtests(db)
-    return paginate(query, params)
+# we don't want this endpt till we have some fine-grained private/unprivate
+# @router.get("/all/", dependencies=[Depends(JWTBearer())])
+# def get_all_backtests(db: Session = Depends(get_db), params: Params = Depends()):
+#     """
+#     Get all backtests for all users.
+#     """
+#     query = backtests_models.Backtest.get_all_backtests(db)
+#     return paginate(query, params)
 
+# this below is not used yet
 @router.get("/pending/")
 def get_pending_backtests(db: Session = Depends(get_db), user=Depends(users_models.Users.get_auth_user)):
     return backtests_models.Backtest.get_all_pending_user_backtests(db, user.id)
