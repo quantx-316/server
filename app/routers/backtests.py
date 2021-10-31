@@ -27,19 +27,23 @@ router = APIRouter(
 )
 
 # backtests by user or by algo_id
-@router.get("/", dependencies=[Depends(JWTBearer())]) # Page[Backtest]
+@router.get("/", dependencies=[Depends(JWTBearer())]) # Page[Backtest] or Backtest 
 def get_specific_backtests(
         algo_id: int = None,
+        backtest_id: int = None,
         db: Session = Depends(get_db),
         user=Depends(users_models.Users.get_auth_user),
         params: Params = Depends(),
         sort_by: str = None,
         sort_direction: str = None
 ):
-    if algo_id is None:
-        query = backtests_models.Backtest.get_all_user_backtests(db, user.id)
-    else:
+    if algo_id is not None:
         query = backtests_models.Backtest.get_all_algo_backtests(db, algo_id)
+    elif backtest_id is not None:
+        return backtests_models.Backtest.get_backtest(db, backtest_id, user.id)
+    else:
+        query = backtests_models.Backtest.get_all_user_backtests(db, user.id)
+
 
     query = sort_encapsulate_query(
         sort_by,
@@ -61,15 +65,6 @@ def get_all_backtests(db: Session = Depends(get_db), params: Params = Depends())
 @router.get("/pending/")
 def get_pending_backtests(db: Session = Depends(get_db), user=Depends(users_models.Users.get_auth_user)):
     return backtests_models.Backtest.get_all_pending_user_backtests(db, user.id)
-
-@router.get("/", dependencies=[Depends(JWTBearer())])
-def get_backtest(backtest_id: int, db: Session = Depends(get_db), owner=Depends(users_models.Users.get_auth_user)):
-    result = backtests_models.Backtest.get_backtest(db, backtest_id, owner.id)
-
-    if not result:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Backtest not found")
-    
-    return result
 
 
 def placeholder_create_background_task(backtest_id: int, owner: int, db: Session):
