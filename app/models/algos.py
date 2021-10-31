@@ -86,4 +86,12 @@ class Algorithm(Base):
         db_algo = Algorithm.get_algo_by_id(db, algo_id, owner)
         db.delete(db_algo)
         db.commit()
-        
+
+    @staticmethod
+    def sorting_attributes_to_col():
+
+        return {
+            "created": Algorithm.created,
+            "edited_at": Algorithm.edited_at,
+            "title": Algorithm.title,
+        }

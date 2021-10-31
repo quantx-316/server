@@ -61,5 +61,5 @@ def reset_db_to_stress():
         conn.close() 
 
 if __name__ == "__main__":
-    generate_csv_data()
+    # generate_csv_data()
     reset_db_to_stress()

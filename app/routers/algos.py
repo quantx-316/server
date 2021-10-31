@@ -9,7 +9,7 @@ import app.schemas.algos as algos_schemas
 import app.models.algos as algos_models
 import app.models.users as users_models  
 from app.utils.security import JWTBearer
-from app.utils.exceptions import UserNotFoundException
+from app.utils.sorting import sort_encapsulate_query
 from app.db import get_db
 
 router = APIRouter(
@@ -49,13 +49,23 @@ def delete_algo(
 def get_algos(
     user=Depends(users_models.Users.get_auth_user), 
     db: Session = Depends(get_db),
-    params: Params = Depends() 
+    params: Params = Depends(),
+    sort_by: str = None,
+    sort_direction: str = None,
 ):
+
     query = algos_models.Algorithm.get_algo_by_user(db, user)
+
+    query = sort_encapsulate_query(
+        sort_by,
+        sort_direction,
+        algos_models.Algorithm.sorting_attributes_to_col(),
+        query,
+    )
+
     return paginate(query, params)
 
 
 @router.get("/", dependencies=[Depends(JWTBearer())], response_model=algos_schemas.AlgoDB)
 def get_algo(algo_id: int, user=Depends(users_models.Users.get_auth_user), db: Session = Depends(get_db)):
     return algos_models.Algorithm.get_algo_by_id(db, algo_id, user)
-
