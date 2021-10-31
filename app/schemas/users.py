@@ -10,7 +10,13 @@ class UsersBase(BaseModel):
     description: Optional[str] = None
 
 
-# so password used when creating/authorizinzg user, but not saved 
+class LimitedUser(BaseModel):
+    username: str
+    firstname: Optional[str] = None
+    lastname: Optional[str] = None
+    description: Optional[str] = None
+
+# so password used when creating/authorizing user, but not saved
 class UserLogin(BaseModel):
     email: EmailStr 
     password: str 

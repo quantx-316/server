@@ -27,7 +27,7 @@ router = APIRouter(
 )
 
 # backtests by user or by algo_id
-@router.get("/", dependencies=[Depends(JWTBearer())]) # Page[Backtest] or Backtest 
+@router.get("/", dependencies=[Depends(JWTBearer())]) # Page[Backtest] or Backtest
 def get_specific_backtests(
         algo_id: int = None,
         backtest_id: int = None,

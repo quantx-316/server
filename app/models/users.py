@@ -24,8 +24,8 @@ class Users(Base):
         return db.query(Users).filter(Users.id == user_id).first()
 
     @staticmethod
-    def get_users(db: Session, skip: int = 0, limit: int = 100):
-        return db.query(Users).offset(skip).limit(limit).all()
+    def get_users(db: Session):
+        return db.query(Users)
     
     @staticmethod 
     def get_user_id_from_email(db: Session, email: str):
@@ -93,3 +93,16 @@ class Users(Base):
         if db_user is None:
             raise auth_exception
         return db_user
+
+    @staticmethod
+    def query_restricted_to_limited(query):
+        return query.with_entities(Users.username, Users.firstname, Users.lastname, Users.description)
+
+    @staticmethod
+    def model_to_limited_user(db_user):
+        return {
+            'username': db_user.username,
+            'firstname': db_user.firstname,
+            'lastname': db_user.lastname,
+            'description': db_user.description,
+        }
