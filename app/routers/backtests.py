@@ -18,6 +18,9 @@ from app.utils.time import datetime_to_unix
 from app.db import get_db
 # from app.routers.notifs import send_notification
 from app.utils.sorting import sort_encapsulate_query
+
+import app.backtest_engine.backtest as bt_engine
+
 import time
 import random 
 
@@ -69,17 +72,22 @@ def get_pending_backtests(db: Session = Depends(get_db), user=Depends(users_mode
     return backtests_models.Backtest.get_all_pending_user_backtests(db, user.id)
 
 
-def placeholder_create_background_task(backtest_id: int, owner: int, db: Session):
+def create_backtest_bg_task(backtest_id: int, owner: int, db: Session):
+    # Fetch backtest object
+    backtest: backtests_schemas.Backtest = backtests_models.Backtest.get_backtest(db, backtest_id, owner)
 
-    start = time.time()
+    # Run backtest
+    result = bt_engine.run_backtest(backtest, db)
 
-    backtest = backtests_models.Backtest.get_backtest(db, backtest_id, owner)
+    # Place result into database
+    score = 0
+
     new_backtest = {
         "id": backtest.id,
         "algo": backtest.algo,
         "owner": backtest.owner,
-        "result": json.dumps({"message": "test"}, indent=4),
-        "score": random.randint(0,100),
+        "result": result,
+        "score": score,
         "code_snapshot": backtest.code_snapshot,
         "test_interval": backtest.test_interval,
         "test_start": datetime_to_unix(backtest.test_start),
@@ -87,10 +95,7 @@ def placeholder_create_background_task(backtest_id: int, owner: int, db: Session
         "created": backtest.created,
     }
     new_backtest = backtests_schemas.Backtest(**new_backtest)
-    while True:
-        end = time.time()
-        if (end-start) > 5:
-            break         
+     
     backtests_models.Backtest.update_backtest(
         db,
         new_backtest,
@@ -119,7 +124,7 @@ def create_backtest(
     if not result:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create backtest")
 
-    background_task.add_task(placeholder_create_background_task, result.id, user.id, db)
+    background_task.add_task(create_backtest_bg_task, result.id, user.id, db)
 
     return result
 
