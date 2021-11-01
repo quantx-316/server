@@ -44,6 +44,27 @@ def delete_algo(
 ):
     return algos_models.Algorithm.delete_algo(db, algo_id, user)
 
+@router.get("/public/", dependencies=[Depends(JWTBearer())])
+def get_public_algos(
+    username: str,
+    sort_by: str,
+    sort_direction: str,
+    db: Session = Depends(get_db),
+    params: Params = Depends(),
+):
+
+    res = algos_models.Algorithm.best_public_algo_backtests(
+        db,
+        username,
+        params.page,
+        params.size,
+        sort_by,
+        sort_direction,
+    )
+
+    return res
+
+
 
 @router.get("/all/", dependencies=[Depends(JWTBearer())], response_model=Page[algos_schemas.AlgoDB])
 def get_algos(

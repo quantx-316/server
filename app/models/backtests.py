@@ -1,5 +1,5 @@
 from datetime import datetime 
-from sqlalchemy import Column, String, Integer, ForeignKey, DateTime 
+from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, PrimaryKeyConstraint
 from sqlalchemy.orm import Session 
 
 from app.db import Base, db as app_db
@@ -127,3 +127,85 @@ class Backtest(Base):
             "test_end": Backtest.test_end,
             "created": Backtest.created,
         }
+
+    @staticmethod
+    def backtest_leaderboard(
+        db: Session,
+        page: int,
+        size: int,
+        sort_by: str,
+        sort_direction: str,
+    ):
+        if page < 1 or size < 0:
+            raise Exception("Invalid params") #TODO: make this better, might already be handled
+
+        if sort_by not in Backtest.sorting_attributes_to_col():
+            raise Exception("Invalid sort by attr") #TODO: make this better exception
+
+        if sort_direction not in ['asc', 'desc']:
+            raise Exception("Invalid sort direction") #TODO: make this better exception
+
+        sort_by = f"bestbacks.{sort_by}"
+        sort_direction = sort_direction.upper()
+
+        ordering = f" ORDER BY {sort_by} {sort_direction} "
+
+        limit = size
+        offset = size * (page - 1)
+
+        query = app_db.validate_sqlstr(f"""
+                SELECT users.username, bestbacks.score, bestbacks.created, bestbacks.id
+                FROM Users AS users JOIN 
+                (
+                    SELECT * 
+                    FROM Backtest AS back JOIN (
+                        SELECT owner AS owner2, backtest_id FROM BestUserBacktest 
+                    ) AS bestback ON bestback.backtest_id=back.id 
+                ) 
+                AS bestbacks 
+                ON bestbacks.owner2 = users.id 
+            """ + ordering + " LIMIT :limit OFFSET :offset "
+            ).bindparams(
+            limit=limit, offset=offset
+        )
+
+        count_query = app_db.validate_sqlstr(f"""
+                SELECT COUNT(*)
+                FROM Users AS users JOIN 
+                (
+                    SELECT * 
+                    FROM Backtest AS back JOIN (
+                        SELECT owner AS owner2, backtest_id FROM BestUserBacktest 
+                    ) AS bestback ON bestback.backtest_id=back.id 
+                ) 
+                AS bestbacks 
+                ON bestbacks.owner2 = users.id 
+                """)
+
+        res = db.execute(query)
+        count_res = db.execute(count_query).first()[0]
+
+        return {
+            'items': [row for row in res],
+            'pagination': {
+                'page': page,
+                'size': size,
+                'total': count_res,
+            }
+        }
+
+
+class BestAlgoBacktest(Base):
+    __tablename__ = 'bestalgobacktest'
+
+    algo_id = Column(Integer, ForeignKey("algorithm.id"), primary_key=True, index=True)
+    backtest_id = Column(Integer, ForeignKey("backtest.id"))
+
+
+class BestUserBacktest(Base):
+    __tablename__ = 'bestuserbacktest'
+
+    owner = Column(Integer, ForeignKey("users.id"), primary_key=True, index=True)
+    backtest_id = Column(Integer, ForeignKey("backtest.id"))
+
+

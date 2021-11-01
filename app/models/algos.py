@@ -1,5 +1,5 @@
 from pydantic.errors import NotNoneError
-from sqlalchemy import Column, String, Integer, ForeignKey, DateTime
+from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, Boolean
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import TextClause 
 
@@ -7,8 +7,10 @@ from app.db import Base, db as app_db
 import app.schemas.algos as algos_schema 
 import app.schemas.users as users_schema 
 from app.models.users import Users
+from app.models.backtests import Backtest
 from app.utils.crud import add_obj_to_db, update_db_instance, update_db_instance_directly
 from app.utils.exceptions import NotOwnerException, AlgoNotFoundException, UpdateException
+from app.models.backtests import BestAlgoBacktest
 
 
 class Algorithm(Base):
@@ -20,6 +22,7 @@ class Algorithm(Base):
     code = Column(String, nullable=False)
     created = Column(DateTime, nullable=False)
     edited_at = Column(DateTime, nullable=False)
+    public = Column(Boolean, nullable=False)
 
     @staticmethod
     def get_algo_by_id(db: Session, algo_id: int, owner: users_schema.Users):
@@ -78,7 +81,73 @@ class Algorithm(Base):
             raise UpdateException
 
         db.refresh(db_algo)
-        return db_algo 
+        return db_algo
+
+    @staticmethod
+    def best_public_algo_backtests(
+            db: Session,
+            username: str,
+            page: int,
+            size: int,
+            sort_by: str,
+            sort_direction: str,
+    ):
+        # TODO: same as leaderboard in models/backtests.py need better exception handling
+        if page < 1 or size < 0:
+            raise Exception("Invalid params")
+
+        if sort_by not in Backtest.sorting_attributes_to_col():
+            raise Exception("Invalid sort_by attr")
+
+        if sort_direction not in ['asc', 'desc']:
+            raise Exception("Invalid sort direction")
+
+        limit = size
+        offset = size * (page - 1)
+
+        user = Users.get_user_by_username(db, username)
+
+        if not user:
+            raise Exception("No user")
+
+        sort_by = f"back.{sort_by}"
+        sort_direction = sort_direction.upper()
+
+        ordering = f" ORDER BY {sort_by} {sort_direction} "
+
+        query = app_db.validate_sqlstr(f"""
+                SELECT * FROM Backtest AS back JOIN 
+                (SELECT backtest_id AS id 
+                FROM BestAlgoBacktest AS best JOIN Algorithm AS algo 
+                ON best.algo_id = algo.id WHERE algo.owner = :user_id AND algo.public = True) 
+                AS backtest_ids 
+                ON backtest_ids.id = back.id 
+                """ + ordering + " LIMIT :limit OFFSET :offset ").bindparams(
+            user_id=user.id, limit=limit, offset=offset,
+        )
+
+        count_query = app_db.validate_sqlstr(f"""
+                SELECT COUNT(*) FROM Backtest AS back JOIN 
+                (SELECT backtest_id AS id 
+                FROM BestAlgoBacktest AS best JOIN Algorithm AS algo 
+                ON best.algo_id = algo.id WHERE algo.owner = :user_id AND algo.public = True) 
+                AS backtest_ids 
+                ON backtest_ids.id = back.id 
+                """).bindparams(
+            user_id=user.id
+        )
+
+        res = db.execute(query)
+        count_res = db.execute(count_query).first()[0]
+
+        return {
+            'items': [row for row in res],
+            'pagination': {
+                'page': page,
+                'size': size,
+                'total': count_res,
+            }
+        }
     
     @staticmethod 
     def delete_algo(db: Session, algo_id: int, owner: users_schema.Users):

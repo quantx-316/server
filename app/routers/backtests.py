@@ -103,6 +103,20 @@ def create_backtest_bg_task(backtest_id: int, owner: int, db: Session):
     ) 
 
 
+@router.get("/leaderboard/", dependencies=[Depends(JWTBearer())])
+def get_backtest_leaderboard(
+    sort_by: str,
+    sort_direction: str,
+    db: Session = Depends(get_db),
+    params: Params = Depends(),
+):
+    res = backtests_models.Backtest.backtest_leaderboard(
+        db, params.page, params.size, sort_by, sort_direction
+    )
+
+    return res
+
+
 @router.post("/", dependencies=[Depends(JWTBearer())])
 def create_backtest( 
     submitted: backtests_schemas.BacktestSubmit,
