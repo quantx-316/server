@@ -81,12 +81,14 @@ class AlgoGenerator:
                     "id": algo['id'],
                     "owner": user_id,
                     "title": algo['title'],
-                    "code": algo['code']
+                    "code": algo['code'],
+                    "public": True,
                 })
                 info.append([
                     str(user_id),
                     str(algo['title']),
-                    str(algo['code'])
+                    str(algo['code']),
+                    True,
                 ])
     
         FileWriter.write_csv_to_path(

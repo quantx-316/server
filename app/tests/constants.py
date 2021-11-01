@@ -10,4 +10,4 @@ DEFAULT_FAKE_BACK_CSV_OUTPUT = os.path.join(DATA_DIR, 'auto_fake_back.csv')
 # Parameters for number of fake csv data to generate 
 NUM_FAKE_USERS = 100 
 NUM_FAKE_ALGOS_PER_USER = 100
-NUM_BACKTESTS_PER_ALGO = 1
+NUM_BACKTESTS_PER_ALGO = 3

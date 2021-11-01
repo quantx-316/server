@@ -2,6 +2,7 @@ from app.tests.client import client
 from app.tests.utils.users import  get_auth_user_header
 from app.tests.utils.files import FileWriter
 import app.tests.constants
+import random
 
 def create_backtest_test(
     algo_id: int, 
@@ -36,6 +37,7 @@ def create_backtest_test(
 
     return data
 
+
 class BacktestGenerator:
     """
     Creates fake backtest information
@@ -58,11 +60,12 @@ class BacktestGenerator:
         ret = []
         for algo in fake_algos:
             for _ in range(num_backtests):
+                score = random.randint(0,100)
                 csv_info.append([
                     str(algo['id']),
                     str(algo['owner']),
                     self.result,
-                    str(self.score),
+                    str(score),
                     str(algo['code']),
                     self.test_interval, 
                     str(self.test_start),
@@ -72,7 +75,7 @@ class BacktestGenerator:
                     "algo": algo['id'],
                     "owner": algo['owner'], 
                     "result": self.result, 
-                    "score": self.score, 
+                    "score": score,
                     "test_interval": self.test_interval, 
                     "test_start": self.test_start, 
                     "test_end": self.test_end, 

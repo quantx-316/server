@@ -39,7 +39,7 @@ def reset_db_to_stress():
                 """, user_data)
             with open(DEFAULT_FAKE_ALGO_CSV_OUTPUT) as algo_data:
                 cur.copy_expert("""
-                    COPY Algorithm ( owner, title, code )
+                    COPY Algorithm ( owner, title, code, public )
                     FROM STDIN WITH CSV 
                 """, algo_data)
             with open(DEFAULT_FAKE_BACK_CSV_OUTPUT) as back_data:
@@ -62,4 +62,5 @@ def reset_db_to_stress():
 
 if __name__ == "__main__":
     # generate_csv_data()
+    # print("Finished generation")
     reset_db_to_stress()
