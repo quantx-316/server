@@ -41,6 +41,16 @@ def generate_test_backtest_result():
                             "num_shares": 1,
                             "price": 75.0
                         },
+                        {
+                            "symbol": "DUKE",
+                            "num_shares": 10,
+                            "price": 90.0,
+                        },
+                        {
+                            "symbol": "D00K",
+                            "num_shares": 20,
+                            "price": 100.0,
+                        }
                     ],
                     "cash": first_min * (second_min+1) * 50,
                     "errors": [
