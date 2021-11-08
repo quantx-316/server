@@ -25,11 +25,14 @@ class Algorithm(Base):
     public = Column(Boolean, nullable=False)
 
     @staticmethod
-    def get_algo_by_id(db: Session, algo_id: int, owner: users_schema.Users):
+    def get_algo_by_id(db: Session, algo_id: int, owner: users_schema.Users = None):
         algo = db.query(Algorithm).filter(Algorithm.id == algo_id).first()
 
         if not algo: 
             raise AlgoNotFoundException
+
+        if owner is None: 
+            return algo 
 
         if algo.owner != owner.id: 
             raise NotOwnerException

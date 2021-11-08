@@ -14,6 +14,7 @@ class AlgoDB(AlgoBase):
     owner: int 
     created: datetime 
     edited_at: datetime 
+    public: bool
 
     class Config: 
         orm_mode = True 
