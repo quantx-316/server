@@ -22,6 +22,9 @@ class Algorithm(Base):
     code = Column(String, nullable=False)
     created = Column(DateTime, nullable=False)
     edited_at = Column(DateTime, nullable=False)
+    test_start_default = Column(DateTime, nullable=False)
+    test_end_default = Column(DateTime, nullable=False)
+    test_interval_default = Column(String, nullable=False)
     public = Column(Boolean, nullable=False)
 
     @staticmethod
@@ -59,11 +62,14 @@ class Algorithm(Base):
         # })
 
         res = db.execute(app_db.validate_sqlstr(f"""
-        INSERT INTO ALGORITHM (owner, title, code)
-        VALUES (:_id, :title, :code)
+        INSERT INTO ALGORITHM (owner, title, code, test_start_default, test_end_default, test_interval_default, public)
+        VALUES (:_id, :title, :code, :test_start_default, :test_end_default, :test_interval_default, :public)
         RETURNING id
         """).bindparams(
-                _id=owner.id, title=algo.title, code=algo.code
+                _id=owner.id, title=algo.title, code=algo.code, 
+                test_start_default=algo.test_start_default, test_end_default = algo.test_end_default, 
+                test_interval_default = algo.test_interval_default,
+                public = algo.public
             )
         )
         db.commit() 

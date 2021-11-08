@@ -5,6 +5,10 @@ from datetime import datetime
 class AlgoBase(BaseModel):
     title: str 
     code: str 
+    test_start_default: datetime
+    test_end_default: datetime
+    test_interval_default: str
+    public: bool
 
 class AlgoSubmit(AlgoBase):
     pass 
