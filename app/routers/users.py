@@ -19,20 +19,27 @@ router = APIRouter(
 # if you do GET id/email paths separately it WILL fail 
 # whether path or query parameter, one will overlap with the other in path parsing
 @router.get("/", dependencies=[Depends(JWTBearer())], response_model=Union[schemas.Users, schemas.LimitedUser]) # Users if requester is owner, otherwise limited information
-def get_user(username: str = None, db: Session = Depends(get_db), user = Depends(models.Users.get_auth_user)):
-    if username is None:
+def get_user(username: str = None, user_id: int = None, db: Session = Depends(get_db), user = Depends(models.Users.get_auth_user)):
+    if username is None and user_id is None:
         raise HTTPException(
             status_code=422,
-            # message="user_id or user_email required"
         )
-    if user.username == username:
-        return user
-    db_user = models.Users.get_user_by_username(db, username)
-    if db_user is None:
-        raise UserNotFoundException
+    # one of them is not None
+    db_user = None
+    if username is not None:
+        if user.username == username:
+            return user
+        db_user = models.Users.get_user_by_username(db, username)
+        if db_user is None:
+            raise UserNotFoundException
+    if user_id is not None:
+        if user.id == user_id:
+            return user
+        db_user = models.Users.get_user(db, user_id)
+        if db_user is None:
+            raise UserNotFoundException
 
     return models.Users.model_to_limited_user(db_user)
-
 
 @router.post("/", response_model=schemas.Users)
 def create_user(user: schemas.UserRegister, db: Session = Depends(get_db)):

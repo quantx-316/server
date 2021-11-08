@@ -48,10 +48,15 @@ def get_specific_backtests(
 
         query = backtests_models.Backtest.get_all_algo_backtests(db, algo_id)
     elif backtest_id is not None:
-        return backtests_models.Backtest.get_backtest(db, backtest_id, user.id)
+
+        backtest = backtests_models.Backtest.get_backtest_by_id(db, backtest_id)
+        algo = algos_models.Algorithm.get_algo_by_id(db, backtest.algo)
+        if not user.id == algo.owner and not algo.public:
+            raise HTTPException(status_code=401)
+
+        return backtest
     else:
         query = backtests_models.Backtest.get_all_user_backtests(db, user.id)
-
 
     query = sort_encapsulate_query(
         sort_by,

@@ -43,6 +43,11 @@ class Backtest(Base):
         return db.query(Backtest).filter(Backtest.owner == owner, Backtest.result == None).all()
 
     @staticmethod
+    def get_backtest_by_id(db: Session, backtest_id: int):
+        backtest = db.query(Backtest).filter(Backtest.id == backtest_id).first()
+        return backtest
+
+    @staticmethod
     def get_backtest(db: Session, backtest_id: int, owner: int):
         backtest = db.query(Backtest).filter(Backtest.id == backtest_id).first()
         if backtest and backtest.owner != owner:
