@@ -10,6 +10,7 @@ import app.models.algos as algos_models
 import app.models.users as users_models  
 from app.utils.security import JWTBearer
 from app.utils.sorting import sort_encapsulate_query
+from app.utils.search import search_encapsulate_query
 from app.db import get_db
 
 router = APIRouter(
@@ -73,9 +74,20 @@ def get_algos(
     params: Params = Depends(),
     sort_by: str = None,
     sort_direction: str = None,
+    search_by: str = None, 
+    search_query: str = None, 
+    exclusive: bool = None
 ):
 
     query = algos_models.Algorithm.get_algo_by_user(db, user)
+
+    query = search_encapsulate_query(
+        search_by, 
+        search_query, 
+        exclusive, 
+        algos_models.Algorithm.searching_attributes_to_col(),
+        query,
+    )
 
     query = sort_encapsulate_query(
         sort_by,

@@ -168,3 +168,11 @@ class Algorithm(Base):
             "edited_at": Algorithm.edited_at,
             "title": Algorithm.title,
         }
+
+    @staticmethod
+    def searching_attributes_to_col():
+
+        return {
+            "title": Algorithm.title,
+            "code": Algorithm.code,
+        }
