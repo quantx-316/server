@@ -95,6 +95,7 @@ class Algorithm(Base):
             size: int,
             sort_by: str,
             sort_direction: str,
+            code_query: str, 
     ):
         # TODO: same as leaderboard in models/backtests.py need better exception handling
         if page < 1 or size < 0:
@@ -119,6 +120,11 @@ class Algorithm(Base):
 
         ordering = f" ORDER BY {sort_by} {sort_direction} "
 
+        where_ = None 
+        if code_query is not None and code_query.strip() != "":
+            where_ = " WHERE code_snapshot LIKE :code "
+            code_query = '%'+code_query+'%' 
+
         query = app_db.validate_sqlstr(f"""
                 SELECT * FROM Backtest AS back JOIN 
                 (SELECT backtest_id AS id 
@@ -126,9 +132,12 @@ class Algorithm(Base):
                 ON best.algo_id = algo.id WHERE algo.owner = :user_id AND algo.public = True) 
                 AS backtest_ids 
                 ON backtest_ids.id = back.id 
-                """ + ordering + " LIMIT :limit OFFSET :offset ").bindparams(
-            user_id=user.id, limit=limit, offset=offset,
-        )
+                """ + ("" if where_ is None else where_) + ordering + " LIMIT :limit OFFSET :offset ")
+
+        if where_ is None:
+            query = query.bindparams(user_id=user.id, limit=limit, offset=offset)
+        else:
+            query = query.bindparams(user_id=user.id, limit=limit, offset=offset, code=code_query)
 
         count_query = app_db.validate_sqlstr(f"""
                 SELECT COUNT(*) FROM Backtest AS back JOIN 
@@ -137,9 +146,12 @@ class Algorithm(Base):
                 ON best.algo_id = algo.id WHERE algo.owner = :user_id AND algo.public = True) 
                 AS backtest_ids 
                 ON backtest_ids.id = back.id 
-                """).bindparams(
-            user_id=user.id
-        )
+                """ + ("" if where_ is None else where_))
+
+        if where_ is None: 
+            count_query = count_query.bindparams(user_id=user.id)
+        else:
+            count_query = count_query.bindparams(user_id=user.id, code=code_query)
 
         res = db.execute(query)
         count_res = db.execute(count_query).first()[0]

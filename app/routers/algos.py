@@ -52,6 +52,7 @@ def get_public_algos(
     sort_direction: str,
     db: Session = Depends(get_db),
     params: Params = Depends(),
+    code_query: str = None, 
 ):
 
     res = algos_models.Algorithm.best_public_algo_backtests(
@@ -61,6 +62,7 @@ def get_public_algos(
         params.size,
         sort_by,
         sort_direction,
+        code_query, 
     )
 
     return res

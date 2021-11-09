@@ -132,6 +132,13 @@ class Backtest(Base):
             "test_end": Backtest.test_end,
             "created": Backtest.created,
         }
+    
+    @staticmethod 
+    def searching_attributes_to_col():
+
+        return {
+            "code_snapshot": Backtest.code_snapshot,
+        }
 
     @staticmethod
     def backtest_leaderboard(
@@ -158,7 +165,7 @@ class Backtest(Base):
 
         where_ = None 
         if username_query is not None and username_query.strip() != "":
-            where_ = "WHERE users.username LIKE :username" 
+            where_ = " WHERE users.username LIKE :username " 
             username_query = '%'+username_query+'%'
 
         limit = size

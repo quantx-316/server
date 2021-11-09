@@ -18,7 +18,7 @@ from app.utils.time import datetime_to_unix
 from app.db import get_db
 # from app.routers.notifs import send_notification
 from app.utils.sorting import sort_encapsulate_query
-
+from app.utils.search import search_encapsulate_query
 import app.backtest_engine.backtest as bt_engine
 
 router = APIRouter(
@@ -35,7 +35,10 @@ def get_specific_backtests(
         user=Depends(users_models.Users.get_auth_user),
         params: Params = Depends(),
         sort_by: str = None,
-        sort_direction: str = None
+        sort_direction: str = None,
+        search_by: str = None, 
+        search_query: str = None, 
+        exclusive: bool = None, 
 ):
     if algo_id is not None:
         algo = algos_models.Algorithm.get_algo_by_id(db, algo_id)
@@ -54,6 +57,14 @@ def get_specific_backtests(
         return backtest
     else:
         query = backtests_models.Backtest.get_all_user_backtests(db, user.id)
+
+    query = search_encapsulate_query(
+        search_by, 
+        search_query, 
+        exclusive, 
+        backtests_models.Backtest.searching_attributes_to_col(),
+        query,
+    )
 
     query = sort_encapsulate_query(
         sort_by,
