@@ -21,9 +21,6 @@ from app.utils.sorting import sort_encapsulate_query
 
 import app.backtest_engine.backtest as bt_engine
 
-import time
-import random 
-
 router = APIRouter(
     prefix="/backtest",
     dependencies=[Depends(JWTBearer())]
@@ -80,6 +77,52 @@ def get_specific_backtests(
 @router.get("/pending/")
 def get_pending_backtests(db: Session = Depends(get_db), user=Depends(users_models.Users.get_auth_user)):
     return backtests_models.Backtest.get_all_pending_user_backtests(db, user.id)
+
+
+def mock_backtest_bg_task(backtest_id: int, owner: int, db: Session):
+
+    from app.tests.constants import DEFAULT_FAKE_BACKTEST_ERR, DEFAULT_FAKE_BACKTEST_RESULT
+    import time, random
+
+    with open(DEFAULT_FAKE_BACKTEST_RESULT) as f:
+        test_result = json.load(f)
+        test_str_res = json.dumps(test_result, indent=4)
+
+    with open(DEFAULT_FAKE_BACKTEST_ERR) as f:
+        test_error = json.load(f)
+        test_str_err = json.dumps(test_error, indent=4)
+
+    backtest: backtests_schemas.Backtest = backtests_models.Backtest.get_backtest(db, backtest_id, owner)
+
+    score = 0
+
+    num = random.randint(0,100)
+    is_err = num < 50
+
+    new_backtest = {
+        "id": backtest.id,
+        "algo": backtest.algo,
+        "owner": backtest.owner,
+        "result": test_str_err if is_err else test_str_res,
+        "score": score,
+        "code_snapshot": backtest.code_snapshot,
+        "test_interval": backtest.test_interval,
+        "test_start": datetime_to_unix(backtest.test_start),
+        "test_end": datetime_to_unix(backtest.test_end),
+        "created": backtest.created,
+    }
+
+    new_backtest = backtests_schemas.Backtest(**new_backtest)
+
+    start = end = time.time()
+    while (end-start) < 5:
+        end = time.time()
+
+    backtests_models.Backtest.update_backtest(
+        db,
+        new_backtest,
+        owner
+    )
 
 
 def create_backtest_bg_task(backtest_id: int, owner: int, db: Session):
@@ -148,7 +191,8 @@ def create_backtest(
     if not result:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create backtest")
 
-    background_task.add_task(create_backtest_bg_task, result.id, user.id, db)
+    # background_task.add_task(create_backtest_bg_task, result.id, user.id, db)
+    background_task.add_task(mock_backtest_bg_task, result.id, user.id, db)
 
     return result
 

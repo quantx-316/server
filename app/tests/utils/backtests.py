@@ -60,11 +60,11 @@ class BacktestGenerator:
         csv_info = [] 
         ret = []
 
-        with open('test_backtest_result.json') as f:
+        with open(app.tests.constants.DEFAULT_FAKE_BACKTEST_RESULT) as f:
             test_result = json.load(f)
             test_str_res = json.dumps(test_result, indent=4)
 
-        with open('test_backtest_error.json') as f:
+        with open(app.tests.constants.DEFAULT_FAKE_BACKTEST_ERR) as f:
             test_error = json.load(f)
             test_str_err = json.dumps(test_error, indent=4)
 

@@ -22,17 +22,20 @@ class Algorithm(Base):
     code = Column(String, nullable=False)
     created = Column(DateTime, nullable=False)
     edited_at = Column(DateTime, nullable=False)
-    test_start_default = Column(DateTime, nullable=False)
-    test_end_default = Column(DateTime, nullable=False)
-    test_interval_default = Column(String, nullable=False)
     public = Column(Boolean, nullable=False)
 
     @staticmethod
-    def get_algo_by_id(db: Session, algo_id: int, owner: users_schema.Users = None):
+    def get_algo_by_id_verified(db: Session, algo_id: int):
         algo = db.query(Algorithm).filter(Algorithm.id == algo_id).first()
 
-        if not algo: 
+        if not algo:
             raise AlgoNotFoundException
+
+        return algo
+
+    @staticmethod
+    def get_algo_by_id(db: Session, algo_id: int, owner: users_schema.Users = None):
+        algo = Algorithm.get_algo_by_id_verified(db, algo_id)
 
         if owner is None: 
             return algo 
@@ -55,20 +58,12 @@ class Algorithm(Base):
     @staticmethod 
     def create_algo(db: Session, algo: algos_schema.AlgoSubmit, owner: users_schema.Users):
 
-        # db_algo = Algorithm(**{
-        #     'owner': owner.id,
-        #     'title': algo.title, 
-        #     'code': algo.code, 
-        # })
-
         res = db.execute(app_db.validate_sqlstr(f"""
-        INSERT INTO ALGORITHM (owner, title, code, test_start_default, test_end_default, test_interval_default, public)
-        VALUES (:_id, :title, :code, :test_start_default, :test_end_default, :test_interval_default, :public)
+        INSERT INTO ALGORITHM (owner, title, code, public)
+        VALUES (:_id, :title, :code, :public)
         RETURNING id
         """).bindparams(
-                _id=owner.id, title=algo.title, code=algo.code, 
-                test_start_default=algo.test_start_default, test_end_default = algo.test_end_default, 
-                test_interval_default = algo.test_interval_default,
+                _id=owner.id, title=algo.title, code=algo.code,
                 public = algo.public
             )
         )

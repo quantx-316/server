@@ -6,6 +6,8 @@ DEFAULT_FAKE_USER_JSON_OUTPUT = os.path.join(DATA_DIR, 'auto_fake_users.json')
 DEFAULT_FAKE_USER_CSV_OUTPUT = os.path.join(DATA_DIR, 'auto_fake_users.csv')
 DEFAULT_FAKE_ALGO_CSV_OUTPUT = os.path.join(DATA_DIR, 'auto_fake_algos.csv')
 DEFAULT_FAKE_BACK_CSV_OUTPUT = os.path.join(DATA_DIR, 'auto_fake_back.csv')
+DEFAULT_FAKE_BACKTEST_RESULT = os.path.join(DATA_DIR, 'test_backtest_result.json')
+DEFAULT_FAKE_BACKTEST_ERR = os.path.join(DATA_DIR, 'test_backtest_error.json')
 
 # Parameters for number of fake csv data to generate 
 NUM_FAKE_USERS = 100 
