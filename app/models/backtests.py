@@ -140,6 +140,7 @@ class Backtest(Base):
         size: int,
         sort_by: str,
         sort_direction: str,
+        username_query: str,
     ):
         if page < 1 or size < 0:
             raise Exception("Invalid params") #TODO: make this better, might already be handled
@@ -155,6 +156,11 @@ class Backtest(Base):
 
         ordering = f" ORDER BY {sort_by} {sort_direction} "
 
+        where_ = None 
+        if username_query is not None and username_query.strip() != "":
+            where_ = "WHERE users.username LIKE :username" 
+            username_query = '%'+username_query+'%'
+
         limit = size
         offset = size * (page - 1)
 
@@ -169,10 +175,13 @@ class Backtest(Base):
                 ) 
                 AS bestbacks 
                 ON bestbacks.owner2 = users.id 
-            """ + ordering + " LIMIT :limit OFFSET :offset "
-            ).bindparams(
-            limit=limit, offset=offset
-        )
+            """ + ("" if where_ is None else where_) + ordering + " LIMIT :limit OFFSET :offset "
+            )
+        
+        if where_ is None: 
+            query = query.bindparams(limit=limit, offset=offset)
+        else:
+            query = query.bindparams(limit=limit, offset=offset, username=username_query)
 
         count_query = app_db.validate_sqlstr(f"""
                 SELECT COUNT(*)
@@ -185,7 +194,10 @@ class Backtest(Base):
                 ) 
                 AS bestbacks 
                 ON bestbacks.owner2 = users.id 
-                """)
+                """ + ("" if where_ is None else where_) )
+        
+        if where_ is not None: 
+            count_query = count_query.bindparams(username=username_query)
 
         res = db.execute(query)
         count_res = db.execute(count_query).first()[0]

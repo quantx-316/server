@@ -115,7 +115,7 @@ def mock_backtest_bg_task(backtest_id: int, owner: int, db: Session):
     new_backtest = backtests_schemas.Backtest(**new_backtest)
 
     start = end = time.time()
-    while (end-start) < 5:
+    while (end-start) < 20:
         end = time.time()
 
     backtests_models.Backtest.update_backtest(
@@ -162,9 +162,10 @@ def get_backtest_leaderboard(
     sort_direction: str,
     db: Session = Depends(get_db),
     params: Params = Depends(),
+    username_query: str = None,
 ):
     res = backtests_models.Backtest.backtest_leaderboard(
-        db, params.page, params.size, sort_by, sort_direction
+        db, params.page, params.size, sort_by, sort_direction, username_query,
     )
 
     return res
