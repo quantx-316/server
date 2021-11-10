@@ -10,6 +10,6 @@ DEFAULT_FAKE_BACKTEST_RESULT = os.path.join(DATA_DIR, 'test_backtest_result.json
 DEFAULT_FAKE_BACKTEST_ERR = os.path.join(DATA_DIR, 'test_backtest_error.json')
 
 # Parameters for number of fake csv data to generate 
-NUM_FAKE_USERS = 100 
+NUM_FAKE_USERS = 100
 NUM_FAKE_ALGOS_PER_USER = 100
-NUM_BACKTESTS_PER_ALGO = 3
+NUM_BACKTESTS_PER_ALGO = 10
