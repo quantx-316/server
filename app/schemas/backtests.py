@@ -20,7 +20,6 @@ class BacktestSubmit(BaseModel):
             raise ValidationError("Interval is not valid")
         return test_interval 
 
-    # may need extra validation on the allowed min / max dates 
     @validator("test_start", pre=True)
     def test_start_validate(cls, test_start):
         return unix_to_utc_datetime(test_start)

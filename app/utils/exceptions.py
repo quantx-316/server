@@ -32,6 +32,7 @@ async def resource_not_found_exception_handler(request: Request, exception: Reso
 
 UserNotFoundException = ResourceNotFoundException("User not found")
 AlgoNotFoundException =  ResourceNotFoundException("Algo not found")
+CompNotFoundException = ResourceNotFoundException("Comp not found")
 
 class BadRequestException(Exception):
     def __init__(self, msg: str):
