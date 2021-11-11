@@ -250,7 +250,7 @@ class Competition(Base):
             raise BadRequestException("Backtest created before competition")
         
         # check backtest succeeded // not in progress
-        if not db_backtest.result or db_backtest.score < 0: # USE SCORE < 0 TO INDICATE ERROR 
+        if not db_backtest.result or db_backtest.score < 0: # SCORE < 0 TO INDICATE FATAL ERROR 
             raise BadRequestException("Backtest did not succeed or did not finish yet")
 
         # backtest can be submitted
