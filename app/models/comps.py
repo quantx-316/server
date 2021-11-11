@@ -34,6 +34,17 @@ class CompetitionEntry(Base):
     submitted = Column(DateTime)
 
     @staticmethod 
+    def get_user_comp_submission(
+        db: Session, 
+        comp_id: int,
+        username: str, 
+    ):
+        return db.query(CompetitionEntry).filter(
+            CompetitionEntry.owner == username, 
+            CompetitionEntry.comp_id == comp_id
+        ).first()
+
+    @staticmethod 
     def get_user_entry_comps(
         db: Session, 
         username: str, 
@@ -144,9 +155,23 @@ class Competition(Base):
         query = CompetitionEntry.get_comp_entries(db, comp_id)
         return query 
 
-
+    # user's submission to a competition
+    @staticmethod 
+    def get_user_comp_submission(
+        db: Session, 
+        comp_id: int, 
+        username: str, 
+    ):
+        query = CompetitionEntry.get_user_comp_submission(
+            db,
+            comp_id, 
+            username, 
+        )
+        return query 
 
     # ETC...
+
+    # competitions that algorithm has been submitted to 
     @staticmethod 
     def get_comp_submitted_algo(
         db: Session, 
@@ -156,6 +181,7 @@ class Competition(Base):
         query = db.query(Competition).filter(Competition.id.in_(subquery))
         return query 
 
+    # competitions that backtest has been submitted to 
     @staticmethod 
     def get_comp_submitted_backtest(
         db: Session, 
@@ -204,14 +230,16 @@ class Competition(Base):
 
 
     @staticmethod 
-    def submit_backtest(db: Session, comp: comps_schema.Competition, backtest: backtests_schema.Backtest, owner: users_schema.Users):
+    def submit_backtest(db: Session, comp_id: int, backtest_id: int, owner: users_schema.Users):
         
+        comp = Competition.get_comp_by_id_verified(db, comp_id)
+
         # is comp even still going
         if comp.end_time <= datetime.now():
             raise BadRequestException("Competition is finished")
 
         # verify owner is owner of backtest and get up to date backtest info
-        db_backtest = backtests_models.Backtest.get_backtest(db, backtest.id, owner.id)
+        db_backtest = backtests_models.Backtest.get_backtest(db, backtest_id, owner.id)
 
         # check start, end ranges 
         if db_backtest.test_start < comp.test_start or db_backtest.test_end > comp.test_end: 
@@ -261,6 +289,12 @@ class Competition(Base):
             test_end=db_backtest.test_end,
         ))
         db.commit()
+
+        return Competition.get_user_comp_submission(
+            db, 
+            comp.id, 
+            owner.username, 
+        )
 
     @staticmethod 
     def update_competition(db: Session, new_comp: comps_schema.Competition, owner: users_schema.Users):
