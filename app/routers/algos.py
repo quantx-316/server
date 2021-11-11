@@ -9,8 +9,7 @@ import app.schemas.algos as algos_schemas
 import app.models.algos as algos_models
 import app.models.users as users_models  
 from app.utils.security import JWTBearer
-from app.utils.sorting import sort_encapsulate_query
-from app.utils.search import search_encapsulate_query
+from app.utils.querying import AlgorithmQuery
 from app.db import get_db
 
 router = APIRouter(
@@ -19,7 +18,7 @@ router = APIRouter(
 )
 
 
-@router.post("/", dependencies=[Depends(JWTBearer())], response_model=algos_schemas.AlgoDB)
+@router.post("/", response_model=algos_schemas.AlgoDB)
 def create_algo(
     algo: algos_schemas.AlgoSubmit, 
     user = Depends(users_models.Users.get_auth_user), 
@@ -28,7 +27,7 @@ def create_algo(
     return algos_models.Algorithm.create_algo(db, algo, user)
 
 
-@router.put("/", dependencies=[Depends(JWTBearer())], response_model=algos_schemas.AlgoDB)
+@router.put("/", response_model=algos_schemas.AlgoDB)
 def update_algo(
     new_algo: algos_schemas.AlgoDB, 
     user = Depends(users_models.Users.get_auth_user), 
@@ -37,7 +36,7 @@ def update_algo(
     return algos_models.Algorithm.update_algo(db, new_algo, user)
 
 
-@router.delete("/", dependencies=[Depends(JWTBearer())])
+@router.delete("/")
 def delete_algo(
     algo_id: int, 
     user = Depends(users_models.Users.get_auth_user), 
@@ -45,7 +44,7 @@ def delete_algo(
 ):
     return algos_models.Algorithm.delete_algo(db, algo_id, user)
 
-@router.get("/public/", dependencies=[Depends(JWTBearer())])
+@router.get("/public/")
 def get_public_algos(
     username: str,
     sort_by: str,
@@ -67,9 +66,7 @@ def get_public_algos(
 
     return res
 
-
-
-@router.get("/all/", dependencies=[Depends(JWTBearer())], response_model=Page[algos_schemas.AlgoDB])
+@router.get("/all/", response_model=Page[algos_schemas.AlgoDB])
 def get_algos(
     user=Depends(users_models.Users.get_auth_user), 
     db: Session = Depends(get_db),
@@ -83,24 +80,12 @@ def get_algos(
 
     query = algos_models.Algorithm.get_algo_by_user(db, user)
 
-    query = search_encapsulate_query(
-        search_by, 
-        search_query, 
-        exclusive, 
-        algos_models.Algorithm.searching_attributes_to_col(),
-        query,
+    return AlgorithmQuery().execute_encapsulated_query(
+        query, params, sort_by, sort_direction, 
+        search_by, search_query, exclusive, 
     )
 
-    query = sort_encapsulate_query(
-        sort_by,
-        sort_direction,
-        algos_models.Algorithm.sorting_attributes_to_col(),
-        query,
-    )
 
-    return paginate(query, params)
-
-
-@router.get("/", dependencies=[Depends(JWTBearer())], response_model=algos_schemas.AlgoDB)
+@router.get("/", response_model=algos_schemas.AlgoDB)
 def get_algo(algo_id: int, user=Depends(users_models.Users.get_auth_user), db: Session = Depends(get_db)):
     return algos_models.Algorithm.get_algo_by_id(db, algo_id, user)
