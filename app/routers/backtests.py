@@ -19,6 +19,7 @@ from app.db import get_db
 # from app.routers.notifs import send_notification
 from app.utils.sorting import sort_encapsulate_query
 from app.utils.search import search_encapsulate_query
+from app.utils.querying import BacktestQuery 
 import app.backtest_engine.backtest as bt_engine
 
 router = APIRouter(
@@ -58,22 +59,15 @@ def get_specific_backtests(
     else:
         query = backtests_models.Backtest.get_all_user_backtests(db, user.id)
 
-    query = search_encapsulate_query(
+    return BacktestQuery().execute_encapsulated_query(
+        query, 
+        params, 
+        sort_by, 
+        sort_direction, 
         search_by, 
         search_query, 
-        exclusive, 
-        backtests_models.Backtest.searching_attributes_to_col(),
-        query,
+        exclusive,
     )
-
-    query = sort_encapsulate_query(
-        sort_by,
-        sort_direction,
-        backtests_models.Backtest.sorting_attributes_to_col(),
-        query,
-    )
-
-    return paginate(query, params)
 
 # we don't want this endpt till we have some fine-grained private/unprivate
 # @router.get("/all/", dependencies=[Depends(JWTBearer())])

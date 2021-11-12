@@ -79,7 +79,7 @@ class Algorithm(Base):
             raise AlgoNotFoundException
         
         try: 
-            db_algo = update_db_instance_directly(db_algo, new_algo, ignore_keys=['id'])
+            db_algo = update_db_instance_directly(db_algo, new_algo, ignore_keys=['id', 'owner', 'created', 'edited_at'])
             db.commit()
         except:
             raise UpdateException

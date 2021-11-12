@@ -13,8 +13,9 @@ class IntegrationClear:
             "ALGORITHM",
             "BACKTEST",
             "COMPETITION",
-            "CompetitionEnrollment",
             "CompetitionEntry",
+            "BestAlgoBacktest",
+            "BestUserBacktest",
         ]
 
         for table_name in table_names:
