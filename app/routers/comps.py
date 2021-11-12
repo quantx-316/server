@@ -17,7 +17,7 @@ router = APIRouter(
     dependencies=[Depends(JWTBearer())]
 )
 
-@router.post("/", response_model=comps_schemas.Competition)
+@router.post("/")
 def create_competition(
     comp: comps_schemas.CompetitionSubmit,
     user = Depends(users_models.Users.get_auth_user),
@@ -42,7 +42,7 @@ def delete_competition(
     return comps_models.Competition.delete_competition(db, comp_id, user)
 
 # GET COMPETITIONS 
-@router.get("/finished", response_model=Page[comps_schemas.Competition])
+@router.get("/finished/", response_model=Page[comps_schemas.Competition])
 def get_finished_competitions(
     db: Session = Depends(get_db),
     params: Params = Depends(),
@@ -61,7 +61,7 @@ def get_finished_competitions(
     )
 
 
-@router.get("/pending", response_model=Page[comps_schemas.Competition])
+@router.get("/pending/", response_model=Page[comps_schemas.Competition])
 def get_pending_competitions(
     db: Session = Depends(get_db),
     params: Params = Depends(),
@@ -80,7 +80,7 @@ def get_pending_competitions(
     )
 
 # get specific competition
-@router.get("/{comp_id}", response_model=comps_schemas.Competition)
+@router.get("/{comp_id}/", response_model=comps_schemas.Competition)
 def get_competition(
     comp_id: int, 
     db: Session = Depends(get_db),
@@ -90,7 +90,7 @@ def get_competition(
     )
 
 # eligible backtests
-@router.get("/{comp_id}/eligible-backtests", response_model=Page[back_schemas.Backtest])
+@router.get("/{comp_id}/eligible-backtests/", response_model=Page[back_schemas.Backtest])
 def get_eligible_backtests(
     comp_id: int, 
     db: Session = Depends(get_db),
@@ -117,7 +117,7 @@ def get_eligible_backtests(
 # COMPETITION ENTRIES
 
 # create entry 
-@router.post("/{comp_id}")
+@router.post("/{comp_id}/")
 def submit_backtest(
     comp_id: int, 
     backtest_id: int, 
@@ -132,7 +132,7 @@ def submit_backtest(
     )
 
 # get all user entries to a competition
-@router.get("/{comp_id}/entries")
+@router.get("/{comp_id}/entries/")
 def get_comp_entries(
     comp_id: int, 
     db: Session = Depends(get_db),
@@ -142,7 +142,7 @@ def get_comp_entries(
     )
 
 # get user's entry to a competition
-@router.get("/{comp_id}/entry")
+@router.get("/{comp_id}/entry/")
 def get_comp_entry_for_user(
     comp_id: int, 
     username: str, 
@@ -152,8 +152,8 @@ def get_comp_entry_for_user(
         db, comp_id, username,
     )
 
-# get competitions user submitted to 
-@router.get("/submitted")
+# get competitions user submitted to, algo was submitted to, backtest was submitted to 
+@router.get("/submitted/")
 def get_comps_submitted_to_by_user(
     username: str = None, 
     algo_id: int = None, 
@@ -180,7 +180,7 @@ def get_comps_submitted_to_by_user(
     
 
 # get competitions owned by user 
-@router.get("/owned")
+@router.get("/owned/")
 def get_comps_owned_by_user(
     username: str, 
     db: Session = Depends(get_db),

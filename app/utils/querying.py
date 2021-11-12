@@ -9,11 +9,6 @@ import app.models.algos as algos_models
 from fastapi_pagination import Params 
 from fastapi import Depends
 
-
-def subquery_encapsulate(query):
-
-    return query.subquery()
-
 def paginate_query(
     query,
     params: Params, 

@@ -12,22 +12,22 @@ class CompetitionSubmit(BaseModel):
     test_start: datetime 
     test_end: datetime 
 
-    @validator("end_time")
+    @validator("end_time", pre=True)
     def end_time_validate(cls, end_time):
         return unix_to_utc_datetime(end_time)
 
-    @validator("test_start")
+    @validator("test_start", pre=True)
     def test_start_validate(cls, test_start):
         return unix_to_utc_datetime(test_start)
     
-    @validator("test_end")
+    @validator("test_end", pre=True)
     def test_end_validate(cls, test_end):
         return unix_to_utc_datetime(test_end)
 
 class Competition(CompetitionSubmit):
 
     id: int 
-    owner: int 
+    owner: str 
     created: datetime 
     edited_at: datetime 
 

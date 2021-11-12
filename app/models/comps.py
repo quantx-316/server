@@ -1,4 +1,4 @@
-from datetime import datetime 
+from datetime import datetime, timedelta 
 from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, PrimaryKeyConstraint
 from sqlalchemy.orm import Session 
 
@@ -12,14 +12,15 @@ import app.models.users as users_models
 from app.utils.crud import update_db_instance_directly
 from app.utils.exceptions import NotOwnerException, UpdateException, CompNotFoundException, BadRequestException
 from app.utils.time import validate_test_intervals
-from app.utils.querying import subquery_encapsulate
+from app.utils.general import subquery_encapsulate
+
 
 class CompetitionEntry(Base):
     __tablename__ = 'competitionentry'
 
     # comp_id, backtest_id is primary key 
-    comp_id = Column(Integer, ForeignKey("competition.id"))
-    owner = Column(String, ForeignKey("users.username"))
+    comp_id = Column(Integer, ForeignKey("competition.id"), primary_key=True)
+    owner = Column(String, ForeignKey("users.username"), primary_key=True)
 
     backtest_id = Column(Integer, ForeignKey("backtest.id"))
     backtest_algo = Column(Integer, ForeignKey("algorithm.id"))
@@ -116,7 +117,7 @@ class Competition(Base):
         if owner is None: 
             return comp 
 
-        if comp.owner != owner.id: 
+        if comp.owner != owner.username: 
             raise NotOwnerException
 
         return comp 
@@ -192,14 +193,19 @@ class Competition(Base):
         return query 
 
     @staticmethod 
-    def create_competition(db: Session, comp: comps_schema.Competition, owner: users_schema.Users):
+    def create_competition(db: Session, comp: comps_schema.CompetitionSubmit, owner: users_schema.Users):
+
+        if comp.end_time < (datetime.now() + timedelta(days=7)):
+            raise BadRequestException("End time must be greater than a week from today")
+        
+        validate_test_intervals(db, comp.test_start, comp.test_end)
         
         res = db.execute(app_db.validate_sqlstr("""
         INSERT INTO COMPETITION (owner, title, description, end_time, test_start, test_end)
-        VALUES (:_id, :title, :desc, :end_time, :test_start, :test_end)
+        VALUES (:username, :title, :desc, :end_time, :test_start, :test_end)
         RETURNING id 
         """).bindparams(
-                _id=owner.id, title=comp.title, desc=comp.description,
+                username=owner.username, title=comp.title, desc=comp.description,
                 end_time=comp.end_time, test_start=comp.test_start, test_end=comp.test_end,
             )   
         )
