@@ -9,7 +9,7 @@ import app.models.users as users_models
 import app.models.comps as comps_models 
 from app.utils.exceptions import BadRequestException
 from app.utils.security import JWTBearer
-from app.utils.querying import BacktestQuery, CompetitionQuery
+from app.utils.querying import BacktestQuery, CompetitionQuery, CompetitionEntryQuery
 from app.db import get_db
 
 router = APIRouter(
@@ -170,14 +170,31 @@ def get_eligible_backtests(
     )
 
 # get all user entries to a competition
+
+# filtering
 @router.get("/{comp_id}/entries/")
 def get_comp_entries(
     comp_id: int, 
     db: Session = Depends(get_db),
+    user = Depends(users_models.Users.get_auth_user),
+    params: Params = Depends(),
+    sort_by: str = None,
+    sort_direction: str = None,
+    search_by: str = None, 
+    search_query: str = None, 
+    exclusive: bool = None
 ):  
-    return comps_models.Competition.get_comp_submitted_users(
-        db, comp_id, 
+    # we dont want requesting user to be included in entries 
+        # ^ changed my mind about this, because user may want to see what rank they are 
+    query = comps_models.Competition.get_comp_submitted_users(
+        db, comp_id
     )
+
+    return CompetitionEntryQuery().execute_encapsulated_query(
+        query, params, sort_by, sort_direction, 
+        search_by, search_query, exclusive, 
+    )
+
 
 # get user's entry to a competition
 @router.get("/{comp_id}/entry/")

@@ -89,3 +89,7 @@ class CompetitionQuery(GenericQuery):
     def __init__(self):
         super().__init__(comps_models.Competition)
 
+class CompetitionEntryQuery(GenericQuery):
+
+    def __init__(self):
+        super().__init__(comps_models.CompetitionEntry)

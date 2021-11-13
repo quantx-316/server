@@ -32,7 +32,7 @@ class CompetitionEntry(Base):
     test_start = Column(String)
     test_end = Column(String)
 
-    submitted = Column(DateTime)
+    created = Column(DateTime)
 
     @staticmethod 
     def get_user_comp_submission(
@@ -54,6 +54,14 @@ class CompetitionEntry(Base):
         return db.query(CompetitionEntry.comp_id).filter(CompetitionEntry.owner == username).distinct()
     
     @staticmethod 
+    def get_comp_entries_excluding(
+        db: Session, 
+        comp_id: int, 
+        exclude_user: str, 
+    ):
+        return CompetitionEntry.get_comp_entries(db, comp_id).filter(CompetitionEntry.owner != exclude_user)
+    
+    @staticmethod 
     def get_comp_entries(
         db: Session, 
         comp_id: int, 
@@ -73,6 +81,24 @@ class CompetitionEntry(Base):
         algo_id: int, 
     ):
         return db.query(CompetitionEntry.comp_id).filter(CompetitionEntry.backtest_algo==algo_id).distinct()
+
+    @staticmethod 
+    def sorting_attributes_to_col():
+
+        return {
+            "score": CompetitionEntry.score, 
+            "test_start": CompetitionEntry.test_start,
+            "test_end": CompetitionEntry.test_end,
+            "created": CompetitionEntry.created,
+        }
+
+    @staticmethod 
+    def searching_attributes_to_col():
+        
+        return {
+            "code_snapshot": CompetitionEntry.code_snapshot, 
+        }
+
 
 class Competition(Base):
     __tablename__ = 'competition'
@@ -147,6 +173,15 @@ class Competition(Base):
     # USERS WHO SUBMITTED TO A CERTAIN COMPETITION 
 
     # users who have submitted to a competition, also competitionentry has submitted time 
+
+    @staticmethod 
+    def get_comp_exclusive_submitted_users(
+        db: Session, 
+        comp_id: int, 
+        exclude_username: str, 
+    ): 
+        return CompetitionEntry.get_comp_entries_excluding(db, comp_id, exclude_username)
+
     @staticmethod 
     def get_comp_submitted_users(
         db: Session, 
@@ -155,7 +190,7 @@ class Competition(Base):
         # users who have submitted to a competition   
         query = CompetitionEntry.get_comp_entries(db, comp_id)
         return query 
-
+    
     # user's submission to a competition
     @staticmethod 
     def get_user_comp_submission(
