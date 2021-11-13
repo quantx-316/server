@@ -244,6 +244,10 @@ class Competition(Base):
         if comp.end_time <= datetime.now():
             raise BadRequestException("Competition is finished")
 
+        # owner cant submit to his own competition
+        if owner.username == comp.owner:
+            raise BadRequestException("Onwer can't submit to own competition")
+
         # verify owner is owner of backtest and get up to date backtest info
         db_backtest = backtests_models.Backtest.get_backtest(db, backtest_id, owner.id)
 
