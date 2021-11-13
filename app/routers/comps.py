@@ -42,7 +42,7 @@ def delete_competition(
     return comps_models.Competition.delete_competition(db, comp_id, user)
 
 # GET COMPETITIONS 
-@router.get("/finished/", response_model=Page[comps_schemas.Competition])
+@router.get("/finished/")
 def get_finished_competitions(
     db: Session = Depends(get_db),
     params: Params = Depends(),
@@ -61,7 +61,7 @@ def get_finished_competitions(
     )
 
 
-@router.get("/pending/", response_model=Page[comps_schemas.Competition])
+@router.get("/pending/")
 def get_pending_competitions(
     db: Session = Depends(get_db),
     params: Params = Depends(),
@@ -136,7 +136,7 @@ def get_comps_owned_by_user(
         db, 
         username, 
     )
-    
+
     return CompetitionQuery().execute_encapsulated_query(
         query, params, sort_by, sort_direction,
         search_by, search_query,
@@ -191,7 +191,7 @@ def get_comp_entry_for_user(
     )
 
 # get specific competition
-@router.get("/{comp_id}/", response_model=comps_schemas.Competition)
+@router.get("/{comp_id}/")
 def get_competition(
     comp_id: int, 
     db: Session = Depends(get_db),

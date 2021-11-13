@@ -104,11 +104,11 @@ class Competition(Base):
      
     @staticmethod 
     def get_finished_comps(db: Session):
-        return db.query(Competition).filter(Competition.end_time >= datetime.now())
+        return db.query(Competition).filter(datetime.now() >= Competition.end_time)
 
     @staticmethod 
     def get_pending_comps(db: Session):
-        return db.query(Competition).filter(Competition.created < datetime.now())
+        return db.query(Competition).filter(Competition.end_time > datetime.now())
 
     @staticmethod 
     def get_comp_by_id(db: Session, comp_id: int, owner: users_schema.Users):
