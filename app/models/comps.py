@@ -261,7 +261,7 @@ class Competition(Base):
             raise BadRequestException("Competition is finished")
 
         query = db.query(backtests_models.Backtest).filter(
-            backtests_models.Backtest.owner == owner, 
+            backtests_models.Backtest.owner == owner.id, 
             backtests_models.Backtest.test_end <= comp.test_end, 
             backtests_models.Backtest.test_start >= comp.test_start, 
             backtests_models.Backtest.created >= comp.created, 

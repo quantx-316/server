@@ -146,7 +146,7 @@ def get_comps_owned_by_user(
 
 
 # eligible backtests
-@router.get("/{comp_id}/eligible-backtests/", response_model=Page[back_schemas.Backtest])
+@router.get("/{comp_id}/eligible-backtests/")
 def get_eligible_backtests(
     comp_id: int, 
     db: Session = Depends(get_db),
@@ -176,7 +176,6 @@ def get_eligible_backtests(
 def get_comp_entries(
     comp_id: int, 
     db: Session = Depends(get_db),
-    user = Depends(users_models.Users.get_auth_user),
     params: Params = Depends(),
     sort_by: str = None,
     sort_direction: str = None,
