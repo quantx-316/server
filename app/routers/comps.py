@@ -25,7 +25,7 @@ def create_competition(
 ): 
     return comps_models.Competition.create_competition(db, comp, user)
 
-@router.put("/", response_model=comps_schemas.Competition)
+@router.put("/")
 def update_competition(
     new_comp: comps_schemas.Competition, 
     user = Depends(users_models.Users.get_auth_user),
