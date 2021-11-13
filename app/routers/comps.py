@@ -79,15 +79,71 @@ def get_pending_competitions(
         exclusive, 
     )
 
-# get specific competition
-@router.get("/{comp_id}/", response_model=comps_schemas.Competition)
-def get_competition(
-    comp_id: int, 
+
+# get competitions user submitted to, algo was submitted to, backtest was submitted to 
+@router.get("/submitted/")
+def get_comps_submitted_to_by_user(
+    username: str = None, 
+    algo_id: int = None, 
+    backtest_id: int = None,
+    params: Params = Depends(),
+    sort_by: str = None,
+    sort_direction: str = None,
+    search_by: str = None,
+    search_query: str = None,
+    exclusive: bool = None,
     db: Session = Depends(get_db),
 ):
-    return comps_models.Competition.get_comp_by_id_verified(
-        db, comp_id, 
+
+    if algo_id is None and backtest_id is None and username is None:
+        raise BadRequestException("at least one query parameter required")
+
+    query = None
+
+    if algo_id is not None:
+        query = comps_models.Competition.get_comp_submitted_algo(
+            db, algo_id
+        )
+    if backtest_id is not None: 
+        query = comps_models.Competition.get_comp_submitted_backtest(
+            db, backtest_id
+        )
+    if username is not None: 
+        query = comps_models.Competition.get_comp_submitted_by_username(
+            db, 
+            username, 
+        )
+
+    return CompetitionQuery().execute_encapsulated_query(
+        query, params, sort_by, sort_direction,
+        search_by, search_query,
+        exclusive,
     )
+
+# get competitions owned by user 
+@router.get("/owned/")
+def get_comps_owned_by_user(
+    username: str,
+    params: Params = Depends(),
+    sort_by: str = None,
+    sort_direction: str = None,
+    search_by: str = None,
+    search_query: str = None,
+    exclusive: bool = None,
+    db: Session = Depends(get_db),
+):
+    query = comps_models.Competition.get_comps_by_owner_username(
+        db, 
+        username, 
+    )
+    
+    return CompetitionQuery().execute_encapsulated_query(
+        query, params, sort_by, sort_direction,
+        search_by, search_query,
+        exclusive,
+    )
+
+
 
 # eligible backtests
 @router.get("/{comp_id}/eligible-backtests/", response_model=Page[back_schemas.Backtest])
@@ -113,24 +169,6 @@ def get_eligible_backtests(
         search_by, search_query, exclusive, 
     )
 
-
-# COMPETITION ENTRIES
-
-# create entry 
-@router.post("/{comp_id}/")
-def submit_backtest(
-    comp_id: int, 
-    backtest_id: int, 
-    db: Session = Depends(get_db),
-    user = Depends(users_models.Users.get_auth_user),
-):
-    return comps_models.Competition.submit_backtest(
-        db, 
-        comp_id, 
-        backtest_id, 
-        user, 
-    )
-
 # get all user entries to a competition
 @router.get("/{comp_id}/entries/")
 def get_comp_entries(
@@ -152,40 +190,29 @@ def get_comp_entry_for_user(
         db, comp_id, username,
     )
 
-# get competitions user submitted to, algo was submitted to, backtest was submitted to 
-@router.get("/submitted/")
-def get_comps_submitted_to_by_user(
-    username: str = None, 
-    algo_id: int = None, 
-    backtest_id: int = None, 
+# get specific competition
+@router.get("/{comp_id}/", response_model=comps_schemas.Competition)
+def get_competition(
+    comp_id: int, 
     db: Session = Depends(get_db),
 ):
+    return comps_models.Competition.get_comp_by_id_verified(
+        db, comp_id, 
+    )
 
-    if algo_id is not None: 
-        return comps_models.Competition.get_comp_submitted_algo(
-            db, algo_id
-        )
-    if backtest_id is not None: 
-        return comps_models.Competition.get_comp_submitted_backtest(
-            db, backtest_id
-        )
+# COMPETITION ENTRIES
 
-    if username is not None: 
-        return comps_models.Competition.get_comp_submitted_by_username(
-            db, 
-            username, 
-        )
-
-    raise BadRequestException("at least one query parameter required")
-    
-
-# get competitions owned by user 
-@router.get("/owned/")
-def get_comps_owned_by_user(
-    username: str, 
+# create entry 
+@router.post("/{comp_id}/")
+def submit_backtest(
+    comp_id: int, 
+    backtest_id: int, 
     db: Session = Depends(get_db),
+    user = Depends(users_models.Users.get_auth_user),
 ):
-    return comps_models.Competition.get_comps_by_owner_username(
+    return comps_models.Competition.submit_backtest(
         db, 
-        username, 
+        comp_id, 
+        backtest_id, 
+        user, 
     )
