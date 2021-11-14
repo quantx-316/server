@@ -260,6 +260,9 @@ class Competition(Base):
         comp = Competition.get_comp_by_id_verified(db, comp_id)
         if comp.end_time <= datetime.now():
             raise BadRequestException("Competition is finished")
+        
+        if comp.owner == owner.username: 
+            raise BadRequestException("No eligible backtests for owner of competition")
 
         query = db.query(backtests_models.Backtest).filter(
             backtests_models.Backtest.owner == owner.id, 
