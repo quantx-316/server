@@ -8,6 +8,16 @@ from app.db import Base
 
 from app.utils.constants import IntervalName
 
+class Symbol(Base):
+    __tablename__ = 'symbol'
+    
+    symbol = Column(String, primary_key=True)
+    searchablesymbol = Column(String)    
+
+    @staticmethod 
+    def get_symbols(db: Session):
+        return db.query(Symbol).all()
+
 # Note:
 #   This is implemented as a mixin, Quote_1m etc inherit from Quote.
 #   I do not believe there is a cleaner way to do this other than 

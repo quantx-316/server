@@ -14,6 +14,10 @@ from app.utils.constants import IntervalName
 
 router = APIRouter()
 
+@router.get("/quote/symbols/", dependencies=[Depends(JWTBearer())])
+def get_quote_symbols(db: Session = Depends(get_db)):
+    return models.Symbol.get_symbols(db)
+
 @router.get("/quote/range/", dependencies=[Depends(JWTBearer())], response_model=schemas.QuoteTimeRange)
 def get_allowed_quote_time_range(db: Session = Depends(get_db)):
     min_, max_ = get_min_max_times(db)        
