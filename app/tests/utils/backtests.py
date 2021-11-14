@@ -49,11 +49,9 @@ class BacktestGenerator:
         self,
     ):
         self._curr_backtest_id = 1 
-        self.test_start = "2018-12-17 09:31:00"
-        self.test_end = "2021-02-12 14:51:00" 
+        self.test_start = app.tests.constants.DEFAULT_TEST_START
+        self.test_end = app.tests.constants.DEFAULT_TEST_END
         self.test_interval = "1m"
-        self.result="{message: 'test'}"
-        self.score=50
 
     def generate_csv_user_backtests(self, fake_algos, num_backtests):
 
@@ -72,46 +70,53 @@ class BacktestGenerator:
             first_half = num_backtests // 2
             second_half = num_backtests - first_half
             for _ in range(first_half):
+                score = random.randint(0, 100)
                 csv_info.append([
                     str(algo['id']),
                     str(algo['owner']),
                     test_str_res,
-                    str(test_result['roi']),
+                    str(score),
                     str(algo['code']),
                     self.test_interval, 
                     str(self.test_start),
                     str(self.test_end),
                 ])
                 ret.append({
+                    "id": self._curr_backtest_id,
                     "algo": algo['id'],
                     "owner": algo['owner'], 
+                    "code": str(algo['code']),
                     "result": test_str_res,
-                    "score": test_result['roi'],
+                    "score": score,
                     "test_interval": self.test_interval, 
                     "test_start": self.test_start, 
                     "test_end": self.test_end, 
                 })
+                self._curr_backtest_id += 1
 
             for _ in range(second_half):
                 csv_info.append([
                     str(algo['id']),
                     str(algo['owner']),
                     test_str_err,
-                    None,
+                    str(-1),
                     str(algo['code']),
                     self.test_interval,
                     str(self.test_start),
                     str(self.test_end),
                 ])
                 ret.append({
+                    "id": self._curr_backtest_id,
                     "algo": algo['id'],
+                    "code": str(algo['code']),
                     "owner": algo['owner'],
                     "result": test_str_err,
-                    "score": None,
+                    "score": -1,
                     "test_interval": self.test_interval,
                     "test_start": self.test_start,
                     "test_end": self.test_end,
                 })
+                self._curr_backtest_id += 1
 
         FileWriter.write_csv_to_path(
             app.tests.constants.DEFAULT_FAKE_BACK_CSV_OUTPUT,

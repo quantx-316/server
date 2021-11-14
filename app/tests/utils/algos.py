@@ -2,6 +2,7 @@ from app.tests.client import client
 from app.tests.utils.users import get_auth_user_header
 from app.tests.utils.files import FileWriter
 import app.tests.constants
+from random import choice 
 
 def create_algo_test(algo_info: dict, user: dict):
 
@@ -68,6 +69,20 @@ class AlgoGenerator:
     # owner, title, code
     def __init__(self):
         self._curr_algo_id = 1 
+        self.titles = [
+            "one long fake algorithm that is testing the limits of the UI",
+            "wow this is a great one, this is the one that will change your life",
+            "the greatest algorithm ever, deserving of an award"
+        ]
+        self.code = """
+# This function will be called for each candle
+def backtest_tick(quote_set, portfolio, quote_history):
+    actions = []
+
+    # write code here 
+
+    return actions
+"""
 
     def generate_csv_user_algos(self, user_ids, num_algos):
 
@@ -102,10 +117,13 @@ class AlgoGenerator:
         return [self.generate_realistic_fake_algo() for _ in range(num_algos)]
     
     def generate_realistic_fake_algo(self):
+
+        title = choice(self.titles)
+
         info = {
             "id": self._curr_algo_id,
-            "title": "test algo",
-            "code": "def randCode(): pass"
+            "title": title,
+            "code": self.code, 
         }
         self._curr_algo_id += 1
     
@@ -115,7 +133,10 @@ class AlgoGenerator:
         return [self.get_fake_algo() for _ in range(num_algos)]
     
     def get_fake_algo(self):
+
+        title = choice(self.titles)
+
         return {
-            "title": "test algo",
-            "code": "def randCode(): pass"
+            "title": title,
+            "code": self.code, 
         }

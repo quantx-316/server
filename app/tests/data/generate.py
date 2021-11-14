@@ -1,8 +1,17 @@
 from app.tests.utils.users import UserGenerator
 from app.tests.utils.algos import AlgoGenerator
 from app.tests.utils.backtests import BacktestGenerator
+from app.tests.utils.comps import CompetitionGenerator, CompetitionEntryGenerator
 import json
 import random
+
+def generate_comp_entry_csv_data(fake_comps, fake_backtests, fake_users):
+    generator = CompetitionEntryGenerator()
+    return generator.generate_csv_comp_entries(fake_comps, fake_backtests, fake_users)
+
+def generate_comp_csv_data(fake_users, num_comps):
+    generator = CompetitionGenerator()
+    return generator.generate_csv_user_comps(fake_users, num_comps) 
 
 def generate_backtest_csv_data(fake_algos, num_backtests):
     generator = BacktestGenerator()
