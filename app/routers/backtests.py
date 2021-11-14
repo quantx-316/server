@@ -109,7 +109,7 @@ def mock_backtest_bg_task(backtest_id: int, owner: int, db: Session):
         "algo": backtest.algo,
         "owner": backtest.owner,
         "result": test_str_err if is_err else test_str_res,
-        "score": score,
+        "score": -1 if is_err else score,
         "code_snapshot": backtest.code_snapshot,
         "test_interval": backtest.test_interval,
         "test_start": datetime_to_unix(backtest.test_start),

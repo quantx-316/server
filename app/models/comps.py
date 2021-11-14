@@ -97,6 +97,7 @@ class CompetitionEntry(Base):
         
         return {
             "code_snapshot": CompetitionEntry.code_snapshot, 
+            "username": CompetitionEntry.owner, 
         }
 
 
@@ -265,6 +266,7 @@ class Competition(Base):
             backtests_models.Backtest.test_end <= comp.test_end, 
             backtests_models.Backtest.test_start >= comp.test_start, 
             backtests_models.Backtest.created >= comp.created, 
+            backtests_models.Backtest.score >= 0,
         )
 
         return query 
@@ -281,7 +283,7 @@ class Competition(Base):
 
         # owner cant submit to his own competition
         if owner.username == comp.owner:
-            raise BadRequestException("Onwer can't submit to own competition")
+            raise BadRequestException("Owner can't submit to own competition")
 
         # verify owner is owner of backtest and get up to date backtest info
         db_backtest = backtests_models.Backtest.get_backtest(db, backtest_id, owner.id)
@@ -302,16 +304,21 @@ class Competition(Base):
             # if already existing entry for (comp_id, uid), remove and then allow insertion
         res = db.execute(app_db.validate_sqlstr("""
             SELECT * FROM CompetitionEntry WHERE
-            comp_id = :comp_id, owner = :username,
+            comp_id = :comp_id AND owner = :username
         """).bindparams(
             comp_id=comp.id, 
             username=owner.username,
         ))
         rows = [row for row in res]
         if len(rows) > 0:
+
+            first = rows[0]
+            if first.backtest_id == db_backtest.id: 
+                raise BadRequestException("This backtest is already your submission")
+
             db.execute(app_db.validate_sqlstr("""
             DELETE FROM CompetitionEntry WHERE 
-            comp_id = :comp_id AND owner = :username,
+            comp_id = :comp_id AND owner = :username
             """).bindparams(
                 comp_id=comp.id,
                 username=owner.username, 
@@ -320,7 +327,7 @@ class Competition(Base):
         # insert new 
         db.execute(app_db.validate_sqlstr("""
         INSERT INTO CompetitionEntry (comp_id, owner, backtest_id, backtest_algo, result, score, code_snapshot, test_interval, test_start, test_end)
-        VALUES (:comp_id, :username, :back_id. :back_algo, :result, :score, :code, :test_int, :test_start, :test_end)
+        VALUES (:comp_id, :username, :back_id, :back_algo, :result, :score, :code, :test_int, :test_start, :test_end)
         """).bindparams(
             comp_id=comp.id, 
             username=owner.username, 
