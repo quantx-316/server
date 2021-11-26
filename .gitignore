@@ -1,3 +1,5 @@
+# API Key
+ingest/secrets.py
 # backtest execution directories
 _backtest_exec_*/
 
