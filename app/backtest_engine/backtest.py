@@ -9,6 +9,8 @@ from typing import List
 
 from sqlalchemy.orm.session import Session
 
+from fastapi import HTTPException
+
 from app.schemas.backtests import Backtest
 from app.schemas.quotes import Quote 
 from app.utils.constants import IntervalName
@@ -36,8 +38,12 @@ def get_timestamps_in_range(start: datetime, end: datetime, interval: IntervalNa
     elif interval == IntervalName.hour:
         return [start + timedelta(hours=i) for i in range(0, (end - start).seconds // 3600)]
     elif interval == IntervalName.day:
+        start = start.replace(hour=0, minute=0, second=0, microsecond=0)
+        end = end.replace(hour=0, minute=0, second=0, microsecond=0)
         return [start + timedelta(days=i) for i in range(0, (end - start).days)]
     elif interval == IntervalName.week:
+        start = start.replace(hour=0, minute=0, second=0, microsecond=0)
+        end = end.replace(hour=0, minute=0, second=0, microsecond=0)
         return [start + timedelta(weeks=i) for i in range(0, (end - start).days // 7)]
     else:
         raise ValueError("Invalid interval name.")
@@ -46,11 +52,20 @@ def get_timestamps_in_range(start: datetime, end: datetime, interval: IntervalNa
 def run_backtest(backtest: Backtest, db: Session) -> str:
     candles: List[datetime] = get_timestamps_in_range(backtest.test_start, backtest.test_end, backtest.test_interval)
 
+    print(f'Candles:')
+    for candle in candles: print(candle)
+
     # Get quotes for each candle
     quotes: List[Quote] = []
     for candle in candles:
-        quote = get_single_quote('AAPL', backtest.test_interval, candle, db)
-        quotes.append(quote)
+        try:
+            quote = get_single_quote('AAPL', backtest.test_interval, candle, db)
+            quotes.append(quote)
+        except HTTPException:
+            print(f'Failed to get quote for candle ({candle})')
+
+    print(f'Successfully fetched {len(quotes)}/{len(candles)} quotes.')
+    print(f'Some requested candles may have been outside market hours and their failure is correct behavior.')
 
     # Set up execution directory 
     dir_name = "_backtest_exec_" + str(backtest.id)

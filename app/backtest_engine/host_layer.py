@@ -7,7 +7,7 @@ from user_code import backtest_tick
 
 class Portfolio():
     def __init__(self):
-        self.cash = 100000
+        self.cash: float = 100000
         self.positions = {}
         self.transactions = []
 
@@ -39,7 +39,7 @@ class Portfolio():
                 self.positions[action['symbol']] -= action['num_shares']
                 self.transactions.append(action)
 
-    def value(self, quoteset):
+    def value(self, quoteset) -> float:
         value = self.cash
         for symbol in self.positions.keys():
             value += self.positions[symbol] * quoteset[symbol]['price_close']
@@ -73,28 +73,59 @@ def main():
 
         results = []
 
-        for quoteset in quotesets:
-            quote_history.append(quoteset)
-            actions = backtest_tick(quoteset, portfolio, quote_history)
+        # Run the user code for each candle
+        try:
+            for quoteset in quotesets:
+                quote_history.append(quoteset)
 
-            for action in actions:
-                portfolio.action(action, quoteset)
-        
-            results.append({
-                'time': str(quoteset['AAPL']['time']),
-                'portfolio': {
-                    'value': portfolio.value(quoteset),
-                    'positions': portfolio.positions.copy(),
-                    'cash': portfolio.cash
+                result = {
+                    'time': str(quoteset['AAPL']['time']),
                 }
-            })
 
-        payload = {
-            'final_value': portfolio.value(quotesets[-1]),
-            'roi': (portfolio.value(quotesets[-1]) - portfolio.value(quotesets[0])) / portfolio.value(quotesets[0]),
-            'transactions': portfolio.transactions,
-            'portfolio_over_time': results,
-        }
+                # Try to run the user code
+                try:
+                    actions = backtest_tick(quoteset, portfolio, quote_history)
+                except Exception as e:
+                    print(f'Exception in user code: {str(e)}')
+                    result['errors'] = [{'description': str(e)}]
+
+                # Try to handle each action returned by the user
+                for action in actions:
+                    try:
+                        portfolio.action(action, quoteset)
+                    except Exception as e:
+                        print(f'Exception handling user actions: {str(e)}')
+                        error = {
+                            'description': str(e),
+                        }
+                        if 'errors' not in result or result['errors'] is None:
+                            result['errors'] = [error]
+                        else:
+                            result['errors'].append(error)
+            
+                # Calculate the portfolio value after applying the actions
+                result['portfolio'] = {              
+                    'value': round(portfolio.value(quoteset), 2),
+                    'positions': portfolio.positions.copy(),
+                    'cash': round(portfolio.cash, 2)
+                }
+
+                results.append(result)
+
+            # Construct and return final payload with backtest results
+            payload = {
+                'final_value': round(portfolio.value(quotesets[-1]), 2),
+                'roi': (portfolio.value(quotesets[-1]) - portfolio.value(quotesets[0])) / portfolio.value(quotesets[0]),
+                'transactions': portfolio.transactions,
+                'portfolio_over_time': results,
+            }
+
+        # Handle any exceptions raised by the backtest engine code
+        except Exception as e:
+            print(f'Exception in backtest engine: {str(e)}')
+            payload = {
+                'errors': [{'description': str(e)}]
+            }
 
         send_msg(s, json.dumps(payload).encode())
 

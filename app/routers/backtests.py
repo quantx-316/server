@@ -197,8 +197,8 @@ def create_backtest(
     if not result:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create backtest")
 
-    # background_task.add_task(create_backtest_bg_task, result.id, user.id, db)
-    background_task.add_task(mock_backtest_bg_task, result.id, user.id, db)
+    background_task.add_task(create_backtest_bg_task, result.id, user.id, db)   # Real
+    # background_task.add_task(mock_backtest_bg_task, result.id, user.id, db)   # Mock
 
     return result
 
