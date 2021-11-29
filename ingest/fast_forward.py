@@ -1,5 +1,9 @@
-import ingest
-from secrets import finn_hub_key
+# import ingest
+try:
+    from secrets import finn_hub_key
+except ImportError:
+    print('Failed to import "finn_hub_key" from "secrets.py". Aborting fast-forward.')
+    exit(1)
 
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -9,7 +13,7 @@ import psycopg2
 from pgcopy import CopyManager
 import finnhub
 
-CONNECTION = "postgres://root:password@localhost:5432/quantx"
+CONNECTION = "postgres://root:password@timedb:5432/quantx"
 symbols = []
 # fast forward till the end of the past hour
 end_time = datetime.now()
@@ -89,7 +93,7 @@ def get_candles_for_symbol(start: datetime, end: datetime, symbol: str):
                 raise e
         break
     else:
-        raise RuntimeWarning(f"API Call Failed for symbol {symbol}, {start_time = }, {end_time = }.")
+        raise RuntimeWarning(f"API Call Failed for symbol {symbol}, start time = {start_time}, end time = {end_time}.")
     #print(response)
     responses.append(response)
     return responses
