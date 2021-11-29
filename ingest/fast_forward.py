@@ -3,7 +3,7 @@ try:
     from secrets import finn_hub_key
 except ImportError:
     print('Failed to import "finn_hub_key" from "secrets.py". Aborting fast-forward.')
-    exit(1)
+    exit(0)
 
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
