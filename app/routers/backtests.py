@@ -137,9 +137,14 @@ def create_backtest_bg_task(backtest_id: int, owner: int, db: Session):
     # Run backtest
     result = bt_engine.run_backtest(backtest, db)
 
-    # Place result into database
-    score = 0
+    # Calculate score
+    result_parsed = json.loads(result.decode())
+    if 'errors' in result_parsed or 'roi' not in result_parsed:
+        score = -1
+    else:
+        score = round(result_parsed["roi"] * 100, 2)
 
+    # Place result into database
     new_backtest = {
         "id": backtest.id,
         "algo": backtest.algo,
