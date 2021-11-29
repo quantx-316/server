@@ -1,4 +1,5 @@
 # import ingest
+import os 
 try:
     from secrets import finn_hub_key
 except ImportError:
@@ -13,7 +14,14 @@ import psycopg2
 from pgcopy import CopyManager
 import finnhub
 
-CONNECTION = "postgres://root:password@timedb:5432/quantx"
+# CONNECTION = "postgres://root:password@timedb:5432/quantx"
+CONNECTION: str = 'postgresql://{}:{}@{}:{}/{}'.format(
+    os.environ.get("POSTGRES_USER", "root"),
+    os.environ.get("POSTGRES_PASSWORD", "password"),
+    os.environ.get("POSTGRES_HOST", "localhost"),
+    os.environ.get("POSTGRES_PORT", 5432),
+    os.environ.get("POSTGRES_DB", "quantx")
+)
 symbols = []
 # fast forward till the end of the past hour
 end_time = datetime.now()

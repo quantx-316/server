@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 service cron start
 # retry until db startup correctly...

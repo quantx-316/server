@@ -6,6 +6,12 @@
 
 
 
+## Notice
+
+**<u>init.sh may fail in docker setup, locally on a Windows 11 machine the solution we found was to copy + paste the init.sh code, delete the init.sh, make a new init.sh, copy + paste code back in. It has to do with Windows line endings and such that aren't necessarily compatible with Linux distros (ie Ubuntu)</u>**
+
+
+
 ## Structure
 
 * /app/config.py
