@@ -1,5 +1,9 @@
 # import ingest
-from secrets import finn_hub_key
+try:
+    from secrets import finn_hub_key
+except ImportError:
+    print('Failed to import "finn_hub_key" from "secrets.py". Aborting fast-forward.')
+    exit(1)
 
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
