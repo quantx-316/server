@@ -4,9 +4,9 @@ COPY ./requirements.txt /main/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /main/requirements.txt
 
 # Setup Ingest
+RUN apt-get update
 RUN apt-get -y install -qq cron dos2unix
 COPY ./ingest/* /main/ingest/
-RUN apt-get update
 COPY ./ingest/crontab /etc/cron.d/ingest_crontab
 RUN chmod 0644 /etc/cron.d/ingest_crontab
 RUN crontab /etc/cron.d/ingest_crontab
