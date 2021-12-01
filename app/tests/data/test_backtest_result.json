@@ -1,0 +1,32 @@
+{
+    "final_value": 100001.73,
+    "roi": 2.3337362983228e-05,
+    "transactions": [
+      {
+        "action": "buy", 
+        "symbol": "<symbol, ex. AAPL>",
+        "num_shares": 1.0 
+      } 
+    ],
+    "portfolio_over_time": [
+      {
+        "time": "2020-01-02 14:30:00",
+        "portfolio": {
+          "value": 999950.93,
+          "positions": [
+            {
+              "symbol": "AAPL", 
+              "num_shares": 1, 
+              "price": 75.0 
+            } 
+          ],
+          "cash": 999810.07,
+          "errors": [
+            {
+              "description": "(exception name etc)"
+            }  
+          ]
+        }
+      }
+    ]
+  }

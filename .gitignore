@@ -10,7 +10,6 @@ __pycache__/
 
 # TEST FILES
 app/tests/data/auto_*
-app/tests/data/test_backtest_*
 
 # C extensions
 *.so

@@ -120,5 +120,5 @@ def reset_db_to_stress():
         print("CONNECTION CLOSED")
 
 if __name__ == "__main__":
-    # generate_csv_data()
+    generate_csv_data()
     reset_db_to_stress()
